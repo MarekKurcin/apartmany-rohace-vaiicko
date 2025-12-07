@@ -78,7 +78,6 @@ class AccommodationController extends BaseController
      */
     public function create(Request $request): Response
     {
-        // Kontrola prihlásenia
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
             return $this->redirect($this->url('auth.login', ['error' => 'not_logged']));
         }

@@ -16,7 +16,7 @@ class User extends Model
     public ?string $priezvisko = null;
     public ?string $telefon = null;
     public ?string $rola = 'turista';
-    protected ?string $datum_vytvorenia = null;
+    public ?string $datum_vytvorenia = null;
 
     /**
      * Registrácia nového používateľa

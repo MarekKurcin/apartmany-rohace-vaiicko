@@ -97,7 +97,7 @@
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <h5><i class="bi bi-house-heart"></i> Apartmány pod Roháčmi</h5>
-                    <p class="text-muted">Nájdite si ideálne ubytovanie v krásnom prostredí Západných Tatier.</p>
+                    <p class="text-secondary">Nájdite si ideálne ubytovanie v krásnom prostredí Západných Tatier.</p>
                 </div>
                 <div class="col-md-4 mb-4">
                     <h5>Rýchle odkazy</h5>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="col-md-4 mb-4">
                     <h5>Kontakt</h5>
-                    <ul class="list-unstyled text-muted">
+                    <ul class="list-unstyled text-secondary">
                         <li><i class="bi bi-geo-alt"></i> Zuberec, Slovensko</li>
                         <li><i class="bi bi-envelope"></i> info@apartmany-rohace.sk</li>
                         <li><i class="bi bi-telephone"></i> +421 900 000 000</li>

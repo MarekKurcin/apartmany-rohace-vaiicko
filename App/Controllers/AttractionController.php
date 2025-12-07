@@ -98,10 +98,10 @@ class AttractionController extends BaseController
         $attraction = new Attraction();
         $attraction->nazov = htmlspecialchars(trim($request->value('nazov')));
         $attraction->popis = htmlspecialchars(trim($request->value('popis')));
-        $attraction->typ = htmlspecialchars(trim($request->value('typ')));
-        $attraction->cena = (int)$request->value('cena');
-        $attraction->poloha = htmlspecialchars(trim($request->value('poloha')));
-        $attraction->obrazok = $request->value('obrazok');
+        $attraction->typ = htmlspecialchars(trim($request->value('typ') ?? ""));
+        $attraction->cena = (int)$request->value('cena') ?? "0";
+        $attraction->poloha = htmlspecialchars(trim($request->value('poloha') ?? ""));
+        $attraction->obrazok = $request->value('obrazok') ? htmlspecialchars(trim($request->value('obrazok'))) : null;
 
         if ($attraction->save()) {
             return $this->redirect($this->url('attraction.index', ['success' => 'created']));
@@ -160,7 +160,7 @@ class AttractionController extends BaseController
         $attraction->typ = htmlspecialchars(trim($request->value('typ')));
         $attraction->cena = (int)$request->value('cena');
         $attraction->poloha = htmlspecialchars(trim($request->value('poloha')));
-        $attraction->obrazok = $request->value('obrazok');
+        $attraction->obrazok = $request->value('obrazok') ? htmlspecialchars(trim($request->value('obrazok'))) : null;
 
         if ($attraction->save()) {
             return $this->redirect($this->url('attraction.index', ['success' => 'updated']));
@@ -220,12 +220,7 @@ class AttractionController extends BaseController
         $popis = trim($request->value('popis'));
         if (empty($popis) || strlen($popis) < 10) {
             $errors['popis'] = 'Popis musí mať minimálne 10 znakov';
-        }
-
-        $cena = $request->value('cena');
-        if ($cena === null || $cena < 0) {
-            $errors['cena'] = 'Cena musí byť 0 alebo väčšia';
-        }
+        }    
 
         return $errors;
     }
