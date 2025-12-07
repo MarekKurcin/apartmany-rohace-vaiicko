@@ -9,14 +9,30 @@ class User extends Model
 {
     protected static ?string $tableName = 'users';
     
-    public ?int $id = null;
-    public ?string $email = null;
-    public ?string $heslo = null;
-    public ?string $meno = null;
-    public ?string $priezvisko = null;
-    public ?string $telefon = null;
-    public ?string $rola = 'turista';
-    public ?string $datum_vytvorenia = null;
+    protected ?int $id = null;
+    protected ?string $email = null;
+    protected ?string $heslo = null;
+    protected ?string $meno = null;
+    protected ?string $priezvisko = null;
+    protected ?string $telefon = null;
+    protected ?string $rola = 'turista';
+    protected ?string $datum_vytvorenia = null;
+
+    /**
+     * Magic getter pre prístup k protected atribútom
+     */
+    public function __get($name)
+    {
+        return $this->$name ?? null;
+    }
+
+    /**
+     * Magic setter pre nastavenie protected atribútov
+     */
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
 
     /**
      * Registrácia nového používateľa

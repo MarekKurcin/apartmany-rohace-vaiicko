@@ -8,12 +8,28 @@ class Review extends Model
 {
     protected static ?string $tableName = 'review';
     
-    public ?int $id = null;
-    public ?int $user_id = null;
-    public ?int $accommodation_id = null;
-    public ?int $hodnotenie = null;
-    public ?string $komentar = null;
-    public ?string $created_at = null;
+    protected ?int $id = null;
+    protected ?int $user_id = null;
+    protected ?int $accommodation_id = null;
+    protected ?int $hodnotenie = null;
+    protected ?string $komentar = null;
+    protected ?string $created_at = null;
+
+    /**
+     * Magic getter pre prístup k protected atribútom
+     */
+    public function __get($name)
+    {
+        return $this->$name ?? null;
+    }
+
+    /**
+     * Magic setter pre nastavenie protected atribútov
+     */
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
 
     /**
      * Získať hodnotenia pre ubytovanie

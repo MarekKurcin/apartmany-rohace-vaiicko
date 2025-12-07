@@ -10,16 +10,32 @@ class Accommodation extends Model
 {
     protected static ?string $tableName = 'accommodation';
     
-    public ?int $id = null;
-    public ?int $user_id = null;
-    public ?string $nazov = null;
-    public ?string $popis = null;
-    public ?string $adresa = null;
-    public ?int $kapacita = null;
-    public ?float $cena_za_noc = null;
-    public ?string $vybavenie = null;
-    public ?string $obrazok = null;
-    public ?bool $aktivne = true;
+    protected ?int $id = null;
+    protected ?int $user_id = null;
+    protected ?string $nazov = null;
+    protected ?string $popis = null;
+    protected ?string $adresa = null;
+    protected ?int $kapacita = null;
+    protected ?float $cena_za_noc = null;
+    protected ?string $vybavenie = null;
+    protected ?string $obrazok = null;
+    protected ?bool $aktivne = true;
+
+    /**
+     * Magic getter pre prístup k protected atribútom
+     */
+    public function __get($name)
+    {
+        return $this->$name ?? null;
+    }
+
+    /**
+     * Magic setter pre nastavenie protected atribútov
+     */
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
 
     /**
      * Získať všetky aktívne ubytovania

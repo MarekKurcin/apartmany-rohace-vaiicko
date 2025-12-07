@@ -9,16 +9,32 @@ class Attraction extends Model
 {
     protected static ?string $tableName = 'attraction';
     
-    public ?int $id = null;
-    public ?string $nazov = null;
-    public ?string $popis = null;
-    public ?string $typ = null;
-    public ?int $cena = 0;
-    public ?string $poloha = null;
-    public ?string $obrazok = null;
+    protected ?int $id = null;
+    protected ?string $nazov = null;
+    protected ?string $popis = null;
+    protected ?string $typ = null;
+    protected ?int $cena = 0;
+    protected ?string $poloha = null;
+    protected ?string $obrazok = null;
     
     // Pre vzdialenosť pri načítaní cez accommodation
-    public ?float $vzdialenost_km = null;
+    protected ?float $vzdialenost_km = null;
+
+    /**
+     * Magic getter pre prístup k protected atribútom
+     */
+    public function __get($name)
+    {
+        return $this->$name ?? null;
+    }
+
+    /**
+     * Magic setter pre nastavenie protected atribútov
+     */
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
 
     /**
      * Získať všetky atrakcie

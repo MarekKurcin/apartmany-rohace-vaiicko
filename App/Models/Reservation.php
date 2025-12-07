@@ -10,14 +10,30 @@ class Reservation extends Model
 {
     protected static ?string $tableName = 'reservation';
     
-    public ?int $id = null;
-    public ?int $user_id = null;
-    public ?int $accommodation_id = null;
-    public ?string $datum_od = null;
-    public ?string $datum_do = null;
-    public ?int $pocet_osob = null;
-    public ?float $celkova_cena = null;
-    public ?string $stav = 'cakajuca';
+    protected ?int $id = null;
+    protected ?int $user_id = null;
+    protected ?int $accommodation_id = null;
+    protected ?string $datum_od = null;
+    protected ?string $datum_do = null;
+    protected ?int $pocet_osob = null;
+    protected ?float $celkova_cena = null;
+    protected ?string $stav = 'cakajuca';
+
+    /**
+     * Magic getter pre prístup k protected atribútom
+     */
+    public function __get($name)
+    {
+        return $this->$name ?? null;
+    }
+
+    /**
+     * Magic setter pre nastavenie protected atribútov
+     */
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
 
     /**
      * Získať rezervácie používateľa
