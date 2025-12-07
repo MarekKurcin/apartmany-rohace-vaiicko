@@ -1,13 +1,5 @@
-/**
- * Apartmány pod Roháčmi - JavaScript
- * Validácia formulárov na strane klienta + netriviálny JavaScript
- */
-
 document.addEventListener('DOMContentLoaded', function() {
     
-    // ========================================
-    // 1. VALIDÁCIA FORMULÁROV NA STRANE KLIENTA
-    // ========================================
     
     // Validácia formulára ubytovania
     const accommodationForm = document.getElementById('accommodationForm');
@@ -107,9 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // ========================================
-    // 2. NETRIVIÁLNY JAVASCRIPT
-    // ========================================
+
     
     // 2.1 Smooth scroll pre anchor linky
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -204,9 +194,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
 });
 
-// ========================================
-// VALIDAČNÉ FUNKCIE
-// ========================================
 
 function validateField(field) {
     const value = field.value.trim();
@@ -352,9 +339,6 @@ function validateReservationForm() {
     return isValid;
 }
 
-// ========================================
-// POMOCNÉ FUNKCIE
-// ========================================
 
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
@@ -430,11 +414,7 @@ function confirmDelete(id, type) {
     }
 }
 
-// ========================================
-// INTERAKTÍVNE FUNKCIE
-// ========================================
 
-// Filtrovanie v reálnom čase
 function filterCards(searchInput, cardsSelector) {
     const searchValue = searchInput.value.toLowerCase();
     const cards = document.querySelectorAll(cardsSelector);

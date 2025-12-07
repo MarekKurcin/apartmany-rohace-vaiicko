@@ -1,9 +1,4 @@
-/* ========================================
-   Apartmány pod Roháčmi - Vlastné CSS štýly
-   Min. 10 vlastných pravidiel (požiadavka checkpointu)
-   ======================================== */
 
-/* 1. Základné premenné a nastavenia */
 :root {
     --primary-color: #2D6A4F;
     --secondary-color: #52B788;
