@@ -1,0 +1,497 @@
+/* ========================================
+   Apartmány pod Roháčmi - Vlastné CSS štýly
+   Min. 10 vlastných pravidiel (požiadavka checkpointu)
+   ======================================== */
+
+/* 1. Základné premenné a nastavenia */
+:root {
+    --primary-color: #2D6A4F;
+    --secondary-color: #52B788;
+    --accent-color: #40916C;
+    --dark-color: #1B4332;
+    --light-color: #D8F3DC;
+    --gold-color: #D4A373;
+    --mint-color: #95D5B2;
+    --text-color: #52796F;
+    --background-color: #F8F9FA;
+    --white: #FFFFFF;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* 2. Navigácia - vlastný štýl */
+.navbar-custom {
+    background: linear-gradient(135deg, var(--dark-color) 0%, var(--primary-color) 100%);
+    box-shadow: var(--shadow);
+    padding: 0.8rem 0;
+}
+
+.navbar-custom .navbar-brand {
+    color: white;
+    font-weight: 700;
+    font-size: 1.4rem;
+    transition: var(--transition);
+}
+
+.navbar-custom .navbar-brand:hover {
+    color: var(--accent-color);
+    transform: scale(1.02);
+}
+
+.navbar-custom .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    margin: 0 0.2rem;
+    border-radius: 5px;
+    transition: var(--transition);
+}
+
+.navbar-custom .nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-custom .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-custom .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* 3. Hero sekcia */
+.hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), 
+                url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920') center/cover no-repeat;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-top: 70px;
+}
+
+.hero-content {
+    color: white;
+    text-align: center;
+    padding: 3rem;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* 4. Vyhľadávací box */
+.search-box {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.search-box .form-label {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* 5. Karty ubytovaní */
+.accommodation-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.accommodation-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.accommodation-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: #e9ecef;
+    position: relative;
+}
+
+.price-badge {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: var(--gold-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.accommodation-features {
+    margin-top: 1rem;
+}
+
+.accommodation-features .badge {
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+}
+
+/* 6. Karty atrakcií */
+.attraction-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.attraction-card:hover {
+    transform: scale(1.03);
+}
+
+.attraction-image {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-color: #e9ecef;
+    position: relative;
+}
+
+.attraction-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: var(--accent-color);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.attraction-badge-lg {
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+}
+
+/* 7. Feature cards (prečo my) */
+.feature-card {
+    padding: 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.feature-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+/* 8. Formuláre a autentifikácia */
+.auth-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.auth-icon {
+    font-size: 4rem;
+    color: var(--primary-color);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(64, 145, 108, 0.25);
+}
+
+/* 9. Detail ubytovania */
+.accommodation-detail-image,
+.attraction-detail-image {
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    background-color: #e9ecef;
+    border-radius: 15px 15px 0 0;
+    position: relative;
+}
+
+.price-display {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+.total-price-box {
+    background: var(--light-color);
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* 10. Footer */
+.footer-custom {
+    background: linear-gradient(135deg, var(--dark-color) 0%, var(--primary-color) 100%);
+    color: white;
+    padding: 3rem 0 1.5rem;
+}
+
+.footer-custom h5 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    display: block;
+    padding: 0.3rem 0;
+    transition: var(--transition);
+}
+
+.footer-links a:hover {
+    color: white;
+    padding-left: 5px;
+}
+
+.footer-custom hr {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 11. Filter panel */
+.filter-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    background: var(--light-color);
+}
+
+/* 12. Hlavný obsah - margin pre fixed navbar */
+.main-content {
+    min-height: calc(100vh - 200px);
+}
+
+body {
+    padding-top: 70px;
+}
+
+/* 13. Sekcie */
+.section-title {
+    font-weight: 700;
+    color: var(--dark-color);
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--gold-color);
+    border-radius: 2px;
+}
+
+/* 14. Password strength indicator */
+.password-strength {
+    height: 5px;
+    border-radius: 3px;
+    transition: var(--transition);
+}
+
+.password-strength.weak {
+    background: linear-gradient(to right, #dc3545 0%, #dc3545 33%, #e9ecef 33%);
+}
+
+.password-strength.medium {
+    background: linear-gradient(to right, #ffc107 0%, #ffc107 66%, #e9ecef 66%);
+}
+
+.password-strength.strong {
+    background: #28a745;
+}
+
+/* 15. Responzívny dizajn */
+@media (max-width: 992px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .search-box {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 70vh;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-content {
+        padding: 1.5rem;
+    }
+    
+    .accommodation-detail-image,
+    .attraction-detail-image {
+        height: 250px;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+    }
+    
+    .navbar-custom .navbar-brand {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .search-box {
+        padding: 1rem;
+    }
+    
+    .price-badge {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+/* 16. Animácie */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.accommodation-card,
+.attraction-card,
+.feature-card {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* 17. Alert štýly */
+.alert {
+    border: none;
+    border-radius: 10px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* 18. Breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+/* 19. Tlačidlá */
+.btn-primary {
+    background: linear-gradient(135deg, var(--gold-color), var(--primary-color));
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--gold-color));
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 163, 115, 0.4);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* 20. Dropdown menu */
+.dropdown-menu {
+    border: none;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.dropdown-item {
+    padding: 0.6rem 1.2rem;
+    transition: var(--transition);
+}
+
+.dropdown-item:hover {
+    background-color: var(--light-color);
+}
