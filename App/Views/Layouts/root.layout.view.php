@@ -61,16 +61,19 @@
                                 <?= htmlspecialchars($currentUser->getFullName()) ?>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="<?= $link->url('user.profile') ?>">Môj profil</a></li>
+                                <li><a class="dropdown-item" href="<?= $link->url('user.profile') ?>"><i class="bi bi-person"></i> Môj profil</a></li>
+                                <li><a class="dropdown-item" href="<?= $link->url('reservation.index') ?>"><i class="bi bi-calendar-check"></i> Moje rezervácie</a></li>
                                 <?php if ($currentUser->isUbytovatel()): ?>
-                                    <li><a class="dropdown-item" href="<?= $link->url('accommodation.create') ?>">Pridať ubytovanie</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="<?= $link->url('reservation.manage') ?>"><i class="bi bi-calendar-week"></i> Správa rezervácií</a></li>
+                                    <li><a class="dropdown-item" href="<?= $link->url('accommodation.create') ?>"><i class="bi bi-plus-circle"></i> Pridať ubytovanie</a></li>
                                 <?php endif; ?>
                                 <?php if ($currentUser->isAdmin()): ?>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="<?= $link->url('attraction.create') ?>">Pridať atrakciu</a></li>
+                                    <li><a class="dropdown-item" href="<?= $link->url('attraction.create') ?>"><i class="bi bi-plus-circle"></i> Pridať atrakciu</a></li>
                                 <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="<?= $link->url('auth.logout') ?>">Odhlásiť sa</a></li>
+                                <li><a class="dropdown-item" href="<?= $link->url('auth.logout') ?>"><i class="bi bi-box-arrow-right"></i> Odhlásiť sa</a></li>
                             </ul>
                         </li>
                     <?php } else { ?>

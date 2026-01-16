@@ -169,28 +169,21 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Rezervačný formulár (placeholder) -->
+            <!-- Rezervačný box -->
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Rezervácia</h5>
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label for="datum_od" class="form-label">Dátum príchodu</label>
-                        <input type="date" class="form-control" id="datum_od" name="datum_od">
-                    </div>
-                    <div class="mb-3">
-                        <label for="datum_do" class="form-label">Dátum odchodu</label>
-                        <input type="date" class="form-control" id="datum_do" name="datum_do">
-                    </div>
-                    <div class="mb-3">
-                        <label for="pocet_osob" class="form-label">Počet osôb</label>
-                        <input type="number" class="form-control" id="pocet_osob" name="pocet_osob" 
-                               min="1" max="<?= $accommodation->kapacita ?>" value="2">
-                    </div>
-                    <button type="button" class="btn btn-success w-100" disabled>
-                        <i class="bi bi-calendar-plus"></i> Rezervovať (už čoskoro)
-                    </button>
+                <div class="card-body text-center">
+                    <p class="h3 text-primary mb-2"><?= number_format($accommodation->cena_za_noc, 2, ',', ' ') ?> &euro;</p>
+                    <p class="text-muted mb-3">za noc</p>
+                    <p class="mb-1"><i class="bi bi-people"></i> Kapacita: <?= $accommodation->kapacita ?> osôb</p>
+                    <hr>
+                    <a href="<?= $link->url('reservation.create', ['id' => $accommodation->id]) ?>"
+                       class="btn btn-success btn-lg w-100">
+                        <i class="bi bi-calendar-plus"></i> Rezervovať teraz
+                    </a>
+                    <small class="text-muted d-block mt-2">Rýchla a jednoduchá rezervácia</small>
                 </div>
             </div>
         </div>

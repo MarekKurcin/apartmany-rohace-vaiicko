@@ -68,7 +68,7 @@ class Reservation extends Model
      */
     public static function isAvailable(int $accommodationId, string $datumOd, string $datumDo, ?int $excludeReservationId = null): bool
     {
-        $sql = "SELECT COUNT(*) as count FROM reservation 
+        $sql = "SELECT COUNT(*) as count FROM reservation
                 WHERE accommodation_id = ? 
                 AND stav IN ('cakajuca', 'potvrdena')
                 AND (
