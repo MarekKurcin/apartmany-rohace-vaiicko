@@ -125,7 +125,7 @@
                         </div>
                         <div class="card-body">
                             <h5 class="card-title"><?= htmlspecialchars($acc->nazov) ?></h5>
-                            <p class="text-muted mb-2">
+                            <p class="text-muted mb-2 odsek-test">
                                 <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($acc->adresa) ?>
                             </p>
                             <p class="text-muted mb-2">

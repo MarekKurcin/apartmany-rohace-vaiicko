@@ -103,9 +103,10 @@ class AttractionController extends BaseController
         $attraction->poloha = htmlspecialchars(trim($request->value('poloha') ?? ""));
         $attraction->obrazok = $request->value('obrazok') ? htmlspecialchars(trim($request->value('obrazok'))) : null;
 
-        if ($attraction->save()) {
+        try {
+            $attraction->save();
             return $this->redirect($this->url('attraction.index', ['success' => 'created']));
-        } else {
+        } catch (\Exception $e) {
             return $this->redirect($this->url('attraction.create', ['error' => 'failed']));
         }
     }
@@ -162,9 +163,10 @@ class AttractionController extends BaseController
         $attraction->poloha = htmlspecialchars(trim($request->value('poloha')));
         $attraction->obrazok = $request->value('obrazok') ? htmlspecialchars(trim($request->value('obrazok'))) : null;
 
-        if ($attraction->save()) {
+        try {
+            $attraction->save();
             return $this->redirect($this->url('attraction.index', ['success' => 'updated']));
-        } else {
+        } catch (\Exception $e) {
             return $this->redirect($this->url('attraction.edit', ['id' => $id, 'error' => 'failed']));
         }
     }
@@ -185,9 +187,10 @@ class AttractionController extends BaseController
             return $this->redirect($this->url('attraction.index', ['error' => 'not_found']));
         }
 
-        if ($attraction->delete()) {
+        try {
+            $attraction->delete();
             return $this->redirect($this->url('attraction.index', ['success' => 'deleted']));
-        } else {
+        } catch (\Exception $e) {
             return $this->redirect($this->url('attraction.index', ['error' => 'delete_failed']));
         }
     }

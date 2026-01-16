@@ -37,7 +37,7 @@ class User extends Model
     /**
      * Registrácia nového používateľa
      */
-    public function register(array $data): bool
+    public function register(array $data): void
     {
         $this->email = $data['email'];
         $this->heslo = password_hash($data['heslo'], PASSWORD_DEFAULT);
@@ -45,8 +45,8 @@ class User extends Model
         $this->priezvisko = $data['priezvisko'];
         $this->telefon = $data['telefon'] ?? null;
         $this->rola = $data['rola'] ?? 'turista';
-        
-        return $this->save();
+
+        $this->save();
     }
 
     /**
@@ -78,14 +78,14 @@ class User extends Model
     /**
      * Aktualizovať profil používateľa
      */
-    public function updateProfile(array $data): bool
+    public function updateProfile(array $data): void
     {
         $this->email = $data['email'];
         $this->meno = $data['meno'];
         $this->priezvisko = $data['priezvisko'];
         $this->telefon = $data['telefon'] ?? null;
-        
-        return $this->save();
+
+        $this->save();
     }
 
     /**
@@ -96,9 +96,10 @@ class User extends Model
         if (!password_verify($currentPassword, $this->heslo)) {
             return false;
         }
-        
+
         $this->heslo = password_hash($newPassword, PASSWORD_DEFAULT);
-        return $this->save();
+        $this->save();
+        return true;
     }
 
     /**
@@ -120,10 +121,10 @@ class User extends Model
     /**
      * Aktualizovať rolu používateľa (admin funkcia)
      */
-    public function updateRole(string $newRole): bool
+    public function updateRole(string $newRole): void
     {
         $this->rola = $newRole;
-        return $this->save();
+        $this->save();
     }
 
     /**

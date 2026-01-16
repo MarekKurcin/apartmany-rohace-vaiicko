@@ -94,14 +94,14 @@ class AuthController extends BaseController
         $errors = $this->validateRegistration($request);
 
         if (!empty($errors)) {
-            return $this->html(['errors' => $errors, 'old' => $request->getPost()], 'register');
+            return $this->html(['errors' => $errors, 'old' => $request->post()], 'register');
         }
 
         // Kontrola či email už existuje
         if (User::emailExists($request->value('email'))) {
             return $this->html([
                 'errors' => ['email' => 'Tento email je už registrovaný'],
-                'old' => $request->getPost()
+                'old' => $request->post()
             ], 'register');
         }
 
@@ -115,12 +115,13 @@ class AuthController extends BaseController
             'rola' => 'turista'
         ];
 
-        if ($user->register($data)) {
+        try {
+            $user->register($data);
             return $this->redirect($this->url('auth.login', ['success' => 'registered']));
-        } else {
+        } catch (\Exception $e) {
             return $this->html([
                 'errors' => ['register' => 'Registrácia zlyhala, skúste to znova'],
-                'old' => $request->getPost()
+                'old' => $request->post()
             ], 'register');
         }
     }

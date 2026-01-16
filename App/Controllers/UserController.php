@@ -94,9 +94,10 @@ class UserController extends BaseController
             $currentUser->email = htmlspecialchars($newEmail);
         }
 
-        if ($currentUser->save()) {
+        try {
+            $currentUser->save();
             return $this->redirect($this->url('user.profile', ['success' => 'updated']));
-        } else {
+        } catch (\Exception $e) {
             return $this->redirect($this->url('user.edit', ['error' => 'failed']));
         }
     }
@@ -136,9 +137,10 @@ class UserController extends BaseController
 
             if (empty($errors)) {
                 $currentUser->heslo = password_hash($newPassword, PASSWORD_DEFAULT);
-                if ($currentUser->save()) {
+                try {
+                    $currentUser->save();
                     return $this->redirect($this->url('user.profile', ['success' => 'password_changed']));
-                } else {
+                } catch (\Exception $e) {
                     $errors['general'] = 'Nepodarilo sa zmeniť heslo';
                 }
             }

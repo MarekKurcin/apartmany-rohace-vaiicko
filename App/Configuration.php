@@ -19,6 +19,8 @@ class Configuration
     /**
      * Application name.
      */
+
+    
     public const APP_NAME = 'Apartmány pod Roháčmi';
 
     /**

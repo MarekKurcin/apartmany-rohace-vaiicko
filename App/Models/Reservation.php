@@ -118,28 +118,28 @@ class Reservation extends Model
     /**
      * Potvrdiť rezerváciu
      */
-    public function confirm(): bool
+    public function confirm(): void
     {
         $this->stav = 'potvrdena';
-        return $this->save();
+        $this->save();
     }
 
     /**
      * Zrušiť rezerváciu
      */
-    public function cancel(): bool
+    public function cancel(): void
     {
         $this->stav = 'zrusena';
-        return $this->save();
+        $this->save();
     }
 
     /**
      * Označiť ako dokončenú
      */
-    public function complete(): bool
+    public function complete(): void
     {
         $this->stav = 'dokoncena';
-        return $this->save();
+        $this->save();
     }
 
     /**

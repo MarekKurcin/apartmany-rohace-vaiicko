@@ -115,9 +115,10 @@ class AccommodationController extends BaseController
         $accommodation->obrazok = $request->value('obrazok');
         $accommodation->aktivne = true;
 
-        if ($accommodation->save()) {
+        try {
+            $accommodation->save();
             return $this->redirect($this->url('accommodation.index', ['success' => 'created']));
-        } else {
+        } catch (\Exception $e) {
             return $this->redirect($this->url('accommodation.create', ['error' => 'failed']));
         }
     }
@@ -188,9 +189,10 @@ class AccommodationController extends BaseController
         $accommodation->obrazok = $request->value('obrazok');
         $accommodation->aktivne = $request->value('aktivne') ? true : false;
 
-        if ($accommodation->save()) {
+        try {
+            $accommodation->save();
             return $this->redirect($this->url('accommodation.index', ['success' => 'updated']));
-        } else {
+        } catch (\Exception $e) {
             return $this->redirect($this->url('accommodation.edit', ['id' => $id, 'error' => 'failed']));
         }
     }
@@ -217,9 +219,10 @@ class AccommodationController extends BaseController
             return $this->redirect($this->url('accommodation.index', ['error' => 'unauthorized']));
         }
 
-        if ($accommodation->delete()) {
+        try {
+            $accommodation->delete();
             return $this->redirect($this->url('accommodation.index', ['success' => 'deleted']));
-        } else {
+        } catch (\Exception $e) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'delete_failed']));
         }
     }
