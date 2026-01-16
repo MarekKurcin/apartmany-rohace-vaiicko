@@ -143,7 +143,7 @@
                                 <?php endif; ?>
                             </div>
                             <div class="mt-3">
-                                <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>" class="btn btn-primary w-100">
+                                <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>" class="btn btn-outline-primary w-100">
                                     Zobraziť detail
                                 </a>
                             </div>

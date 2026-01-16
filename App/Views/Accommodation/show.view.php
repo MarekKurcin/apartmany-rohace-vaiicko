@@ -190,7 +190,7 @@
     </div>
 
     <div class="mt-4">
-        <a href="<?= $link->url('accommodation.index') ?>" class="btn btn-outline-primary">
+        <a href="<?= $link->url('accommodation.index') ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Späť na zoznam ubytovaní
         </a>
     </div>

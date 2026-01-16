@@ -121,7 +121,7 @@
     </div>
 
     <div class="mt-4">
-        <a href="<?= $link->url('attraction.index') ?>" class="btn btn-outline-primary">
+        <a href="<?= $link->url('attraction.index') ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Späť na zoznam atrakcií
         </a>
     </div>

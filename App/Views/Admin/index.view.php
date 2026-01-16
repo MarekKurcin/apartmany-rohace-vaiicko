@@ -93,10 +93,10 @@
                 </div>
                 <div class="card-body">
                     <div class="btn-group" role="group">
-                        <a href="<?= $link->url('accommodation.create') ?>" class="btn btn-primary">
+                        <a href="<?= $link->url('accommodation.create') ?>" class="btn btn-success">
                             <i class="bi bi-plus-circle"></i> Pridať ubytovanie
                         </a>
-                        <a href="<?= $link->url('attraction.create') ?>" class="btn btn-info">
+                        <a href="<?= $link->url('attraction.create') ?>" class="btn btn-success">
                             <i class="bi bi-plus-circle"></i> Pridať atrakciu
                         </a>
                         <a href="<?= $link->url('accommodation.index') ?>" class="btn btn-secondary">

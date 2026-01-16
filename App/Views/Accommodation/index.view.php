@@ -94,8 +94,8 @@
                             <?php endif; ?>
                         </div>
                         <div class="card-footer bg-transparent">
-                            <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>" 
-                               class="btn btn-primary w-100">
+                            <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>"
+                               class="btn btn-outline-primary w-100">
                                 <i class="bi bi-eye"></i> Zobraziť detail
                             </a>
                         </div>
