@@ -14,20 +14,22 @@
                 </div>
                 <div class="card-body">
                     <!-- Info o ubytovaní -->
-                    <div class="alert alert-light border mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h5 class="mb-1"><?= htmlspecialchars($accommodation->nazov) ?></h5>
-                                <p class="mb-1 text-muted">
-                                    <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($accommodation->adresa) ?>
-                                </p>
-                                <p class="mb-0">
-                                    <i class="bi bi-people"></i> Kapacita: <?= $accommodation->kapacita ?> osôb
-                                </p>
-                            </div>
-                            <div class="col-md-4 text-md-end">
-                                <span class="h4 text-primary"><?= number_format($accommodation->cena_za_noc, 2, ',', ' ') ?> &euro;</span>
-                                <small class="text-muted d-block">za noc</small>
+                    <div class="card bg-light border mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1"><?= htmlspecialchars($accommodation->nazov) ?></h5>
+                                    <p class="mb-1 text-muted">
+                                        <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($accommodation->adresa) ?>
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="bi bi-people"></i> Kapacita: <?= $accommodation->kapacita ?> osôb
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <span class="h4 text-primary"><?= number_format($accommodation->cena_za_noc, 2, ',', ' ') ?> &euro;</span>
+                                    <small class="text-muted d-block">za noc</small>
+                                </div>
                             </div>
                         </div>
                     </div>

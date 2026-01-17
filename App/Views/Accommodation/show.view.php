@@ -37,8 +37,8 @@
                         <span class="badge bg-primary fs-5"><?= number_format($accommodation->cena_za_noc, 2) ?> €/noc</span>
                     </div>
 
-                    <?php if ($averageRating): ?>
-                        <div class="mb-3">
+                    <div class="mb-3" id="averageRating">
+                        <?php if ($averageRating): ?>
                             <span class="text-warning">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
                                     <?php if ($i <= $averageRating): ?>
@@ -51,8 +51,10 @@
                                 <?php endfor; ?>
                             </span>
                             <small class="text-muted">(<?= number_format($averageRating, 1) ?> z <?= count($reviews) ?> hodnotení)</small>
-                        </div>
-                    <?php endif; ?>
+                        <?php else: ?>
+                            <span class="text-muted">Zatiaľ bez hodnotení</span>
+                        <?php endif; ?>
+                    </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -92,33 +94,193 @@
             </div>
 
             <!-- Hodnotenia -->
-            <?php if (!empty($reviews)): ?>
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-light">
-                        <h3 class="mb-0"><i class="bi bi-star"></i> Hodnotenia (<?= count($reviews) ?>)</h3>
-                    </div>
-                    <div class="card-body">
-                        <?php foreach ($reviews as $review): ?>
-                            <div class="mb-3 pb-3 border-bottom">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <strong><?= htmlspecialchars($review->getUser()?->meno ?? 'Používateľ') ?></strong>
-                                        <div class="text-warning">
-                                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                                <i class="bi bi-star<?= $i <= $review->hodnotenie ? '-fill' : '' ?>"></i>
-                                            <?php endfor; ?>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h3 class="mb-0" id="reviewsHeader"><i class="bi bi-star"></i> Hodnotenia (<?= count($reviews) ?>)</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Alert container pre AJAX správy -->
+                    <div id="reviewAlerts"></div>
+
+                    <!-- Formulár pre pridanie recenzie (AJAX) -->
+                    <?php
+                    $canReview = $user->isLoggedIn();
+                    $hasReviewed = false;
+                    if ($canReview) {
+                        $hasReviewed = \App\Models\Review::hasUserReviewed($user->getId(), $accommodation->id);
+                    }
+                    ?>
+
+                    <?php if ($canReview && !$hasReviewed): ?>
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h5><i class="bi bi-pencil-square"></i> Pridať hodnotenie</h5>
+                            <form id="reviewForm">
+                                <input type="hidden" name="accommodation_id" value="<?= $accommodation->id ?>">
+                                <input type="hidden" name="hodnotenie" id="reviewRating" value="">
+
+                                <div class="mb-3">
+                                    <label class="form-label">Vaše hodnotenie</label>
+                                    <div class="rating-input fs-3">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <i class="bi bi-star rating-star text-warning" data-value="<?= $i ?>" style="cursor: pointer;"></i>
+                                        <?php endfor; ?>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="reviewComment" class="form-label">Komentár (voliteľný)</label>
+                                    <textarea class="form-control" id="reviewComment" name="komentar" rows="3"
+                                              maxlength="1000" placeholder="Podeľte sa o svoj zážitok..."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send"></i> Odoslať hodnotenie
+                                </button>
+                            </form>
+                        </div>
+
+<script>
+// Inline debug pre recenzie
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Inline review script loaded');
+
+    const stars = document.querySelectorAll('.rating-star');
+    const ratingInput = document.getElementById('reviewRating');
+    const reviewForm = document.getElementById('reviewForm');
+
+    console.log('Stars found:', stars.length);
+    console.log('Rating input:', ratingInput);
+    console.log('Review form:', reviewForm);
+
+    // Hviezdicky click handler
+    stars.forEach(function(star) {
+        star.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            console.log('Star clicked:', value);
+            if (ratingInput) {
+                ratingInput.value = value;
+            }
+            // Update vizual
+            stars.forEach(function(s) {
+                const sVal = parseInt(s.getAttribute('data-value'));
+                s.classList.remove('bi-star', 'bi-star-fill');
+                s.classList.add(sVal <= value ? 'bi-star-fill' : 'bi-star');
+            });
+        });
+    });
+
+    // Form submit handler
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+            console.log('Rating value:', ratingInput ? ratingInput.value : 'no input');
+
+            if (!ratingInput || !ratingInput.value || ratingInput.value < 1) {
+                alert('Vyberte prosím hodnotenie (1-5 hviezdičiek)');
+                return;
+            }
+
+            const formData = new FormData(reviewForm);
+
+            fetch('?c=Accommodation&a=storeReview', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data);
+                if (data.success) {
+                    alert('Recenzia bola pridaná!');
+                    location.reload();
+                } else {
+                    alert('Chyba: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Nastala chyba pri odosielaní');
+            });
+        });
+    }
+});
+</script>
+                    <?php elseif ($canReview && $hasReviewed): ?>
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle"></i> Toto ubytovanie ste už hodnotili.
+                        </div>
+                    <?php elseif (!$canReview): ?>
+                        <div class="alert alert-secondary mb-4">
+                            <i class="bi bi-person"></i> Pre pridanie hodnotenia sa <a href="<?= $link->url('auth.login') ?>">prihláste</a>.
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Zoznam recenzií -->
+                    <?php
+                    $isAdmin = $user->isLoggedIn() && \App\Models\User::getOne($user->getId())?->isAdmin();
+                    ?>
+                    <div id="reviewsContainer">
+                        <?php if (!empty($reviews)): ?>
+                            <?php foreach ($reviews as $review): ?>
+                                <div class="mb-3 pb-3 border-bottom" id="review-<?= $review->id ?>">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong><?= htmlspecialchars($review->getUser()?->meno ?? 'Používateľ') ?></strong>
+                                            <div class="text-warning">
+                                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                    <i class="bi bi-star<?= $i <= $review->hodnotenie ? '-fill' : '' ?>"></i>
+                                                <?php endfor; ?>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <small class="text-muted"><?= $review->created_at ? date('d.m.Y', strtotime($review->created_at)) : date('d.m.Y') ?></small>
+                                            <?php if ($isAdmin): ?>
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        onclick="deleteReview(<?= $review->id ?>, <?= $accommodation->id ?>)"
+                                                        title="Vymazať recenziu">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
-                                    <small class="text-muted"><?= date('d.m.Y', strtotime($review->created_at)) ?></small>
+                                    <?php if ($review->komentar): ?>
+                                        <p class="mt-2 mb-0"><?= nl2br(htmlspecialchars($review->komentar)) ?></p>
+                                    <?php endif; ?>
                                 </div>
-                                <?php if ($review->komentar): ?>
-                                    <p class="mt-2 mb-0"><?= nl2br(htmlspecialchars($review->komentar)) ?></p>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-muted text-center">Zatiaľ žiadne hodnotenia. Buďte prvý!</p>
+                        <?php endif; ?>
                     </div>
+
+                    <?php if ($isAdmin): ?>
+                    <script>
+                    function deleteReview(reviewId, accommodationId) {
+                        if (!confirm('Naozaj chcete vymazať túto recenziu?')) return;
+
+                        fetch('?c=Accommodation&a=deleteReview', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                            body: 'review_id=' + reviewId + '&accommodation_id=' + accommodationId
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById('review-' + reviewId).remove();
+                                alert('Recenzia bola vymazaná');
+                            } else {
+                                alert('Chyba: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Nastala chyba pri mazaní');
+                        });
+                    }
+                    </script>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+            </div>
 
             <!-- Tlačidlá pre vlastníka/admina -->
             <?php if (isset($user) && $user?->isLoggedIn()): ?>

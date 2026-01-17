@@ -542,3 +542,48 @@ body {
 .dropdown-item:hover {
     background-color: var(--light-color);
 }
+
+/* 21. AJAX Loading a animacie */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.review-item {
+    animation: fadeIn 0.5s ease;
+}
+
+#filterLoading {
+    padding: 2rem;
+}
+
+/* 22. Rating hviezdicky */
+.rating-star {
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.rating-star:hover {
+    transform: scale(1.2);
+}
+
+.rating-input {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+/* 23. AJAX filter vysledky */
+.accommodation-item {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* 24. Alert animacie */
+.alert.fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}

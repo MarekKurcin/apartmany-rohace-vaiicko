@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    
-    
+
     // Validácia formulára ubytovania
     const accommodationForm = document.getElementById('accommodationForm');
     if (accommodationForm) {
@@ -169,9 +168,9 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollObserver.observe(el);
     });
     
-    // 2.5 Auto-hide alerts
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
+    // 2.5 Auto-hide alerts (only success/danger notifications, not static info/secondary boxes)
+    const notificationAlerts = document.querySelectorAll('.alert-success, .alert-danger');
+    notificationAlerts.forEach(alert => {
         setTimeout(() => {
             alert.style.transition = 'opacity 0.5s ease';
             alert.style.opacity = '0';
@@ -191,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
             counter.textContent = `${this.value.length} / ${maxLength}`;
         });
     });
-    
+
 });
 
 
@@ -435,12 +434,12 @@ function filterCards(searchInput, cardsSelector) {
 function sortCards(sortBy, order = 'asc') {
     const container = document.querySelector('.row.g-4');
     if (!container) return;
-    
+
     const cards = Array.from(container.children);
-    
+
     cards.sort((a, b) => {
         let valueA, valueB;
-        
+
         switch (sortBy) {
             case 'price':
                 valueA = parseFloat(a.querySelector('.price-badge')?.textContent?.replace(/[^0-9.]/g, '') || 0);
@@ -453,13 +452,370 @@ function sortCards(sortBy, order = 'asc') {
             default:
                 return 0;
         }
-        
+
         if (order === 'asc') {
             return valueA > valueB ? 1 : -1;
         } else {
             return valueA < valueB ? 1 : -1;
         }
     });
-    
+
     cards.forEach(card => container.appendChild(card));
 }
+
+// ===========================================
+// AJAX FUNKCIE
+// ===========================================
+
+/**
+ * AJAX Filtrovanie ubytovani
+ * Dynamicke nacitanie ubytovani bez refreshu stranky
+ */
+function initAjaxFilter() {
+    const filterForm = document.getElementById('accommodationFilterForm');
+    if (!filterForm) return;
+
+    const accommodationGrid = document.getElementById('accommodationGrid');
+    const loadingIndicator = document.getElementById('filterLoading');
+
+    filterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        filterAccommodations();
+    });
+
+    // Live filtrovanie pri zmene inputov (s debounce)
+    let debounceTimer;
+    filterForm.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                filterAccommodations();
+            }, 500);
+        });
+    });
+
+    function filterAccommodations() {
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams();
+
+        formData.forEach((value, key) => {
+            if (value) params.append(key, value);
+        });
+
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+
+        fetch(`?c=Accommodation&a=filterAjax&${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+
+            if (data.success) {
+                renderAccommodations(data.data, data.count);
+            } else {
+                showFilterError('Nastala chyba pri nacitavani');
+            }
+        })
+        .catch(error => {
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            console.error('AJAX Filter Error:', error);
+            showFilterError('Nastala chyba pri komunikacii so serverom');
+        });
+    }
+
+    function renderAccommodations(accommodations, count) {
+        if (!accommodationGrid) return;
+
+        // Aktualizacia poctu vysledkov
+        const countBadge = document.getElementById('resultCount');
+        if (countBadge) {
+            countBadge.textContent = count;
+        }
+
+        if (accommodations.length === 0) {
+            accommodationGrid.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info text-center" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        Nenasli sa ziadne ubytovania podla zadanych kriterii.
+                        <br>
+                        <a href="javascript:void(0)" onclick="clearFilters()" class="alert-link">Zrusit filtre</a>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        accommodations.forEach(acc => {
+            const vybavenieHtml = acc.vybavenie.slice(0, 3).map(v =>
+                `<span class="badge bg-secondary me-1">${escapeHtml(v)}</span>`
+            ).join('');
+            const extraCount = acc.vybavenie.length > 3 ?
+                `<span class="badge bg-light text-dark">+${acc.vybavenie.length - 3}</span>` : '';
+
+            html += `
+                <div class="col-md-6 col-lg-4 accommodation-item" data-aos="fade-up">
+                    <div class="card h-100 shadow-sm">
+                        <div class="position-relative">
+                            <img src="${escapeHtml(acc.obrazok)}"
+                                 class="card-img-top"
+                                 style="height: 200px; object-fit: cover;"
+                                 alt="${escapeHtml(acc.nazov)}"
+                                 loading="lazy">
+                            <span class="position-absolute top-0 end-0 m-2 badge bg-primary fs-6">
+                                ${acc.cena_za_noc} €/noc
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${escapeHtml(acc.nazov)}</h5>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-geo-alt"></i> ${escapeHtml(acc.adresa)}
+                            </p>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-people"></i> Kapacita: ${acc.kapacita} osob
+                            </p>
+                            ${acc.popis ? `<p class="card-text small">${escapeHtml(acc.popis)}</p>` : ''}
+                            <div class="mb-3">
+                                ${vybavenieHtml}
+                                ${extraCount}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="?c=Accommodation&a=show&id=${acc.id}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-eye"></i> Zobrazit detail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        accommodationGrid.innerHTML = html;
+
+        // Animacia novych kariet
+        accommodationGrid.querySelectorAll('.accommodation-item').forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 50);
+        });
+    }
+
+    function showFilterError(message) {
+        if (!accommodationGrid) return;
+        accommodationGrid.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger text-center" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> ${message}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function clearFilters() {
+    const filterForm = document.getElementById('accommodationFilterForm');
+    if (filterForm) {
+        filterForm.reset();
+        filterForm.dispatchEvent(new Event('submit'));
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * AJAX Pridavanie recenzii
+ * Dynamicke pridanie recenzie bez refreshu stranky
+ */
+function initAjaxReview() {
+    const reviewForm = document.getElementById('reviewForm');
+    if (!reviewForm) return;
+
+    const reviewsContainer = document.getElementById('reviewsContainer');
+    const reviewsHeader = document.getElementById('reviewsHeader');
+    const ratingStars = reviewForm.querySelectorAll('.rating-star');
+    const ratingInput = document.getElementById('reviewRating');
+
+    // Interaktivne hviezdicky
+    ratingStars.forEach(star => {
+        star.addEventListener('click', function() {
+            const value = this.dataset.value;
+            ratingInput.value = value;
+            updateStars(value);
+        });
+
+        star.addEventListener('mouseenter', function() {
+            const value = this.dataset.value;
+            highlightStars(value);
+        });
+
+        star.addEventListener('mouseleave', function() {
+            highlightStars(ratingInput.value || 0);
+        });
+    });
+
+    function updateStars(value) {
+        ratingStars.forEach(star => {
+            const starValue = parseInt(star.dataset.value);
+            star.classList.remove('bi-star', 'bi-star-fill');
+            star.classList.add(starValue <= value ? 'bi-star-fill' : 'bi-star');
+        });
+    }
+
+    function highlightStars(value) {
+        ratingStars.forEach(star => {
+            const starValue = parseInt(star.dataset.value);
+            star.classList.remove('bi-star', 'bi-star-fill');
+            star.classList.add(starValue <= value ? 'bi-star-fill' : 'bi-star');
+        });
+    }
+
+    // Odoslanie formulara
+    reviewForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(reviewForm);
+        const submitBtn = reviewForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        // Validacia
+        if (!ratingInput.value || ratingInput.value < 1) {
+            showReviewAlert('Vyberte prosim hodnotenie (1-5 hviezdicky)', 'warning');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Odosielam...';
+
+        fetch('?c=Accommodation&a=storeReview', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+
+            if (data.success) {
+                // Pridat novu recenziu do zoznamu
+                addReviewToList(data.review);
+
+                // Aktualizovat priemerne hodnotenie
+                updateAverageRating(data.newAverage, data.reviewCount);
+
+                // Resetovat formular
+                reviewForm.reset();
+                ratingInput.value = '';
+                updateStars(0);
+
+                // Skryt formular (uzivatel uz hodnotil)
+                reviewForm.style.display = 'none';
+
+                showReviewAlert(data.message, 'success');
+            } else {
+                showReviewAlert(data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            console.error('AJAX Review Error:', error);
+            showReviewAlert('Nastala chyba pri odosielani recenzie', 'danger');
+        });
+    });
+
+    function addReviewToList(review) {
+        if (!reviewsContainer) return;
+
+        // Ak je prazdny zoznam, odstranit placeholder
+        const emptyMessage = reviewsContainer.querySelector('.text-muted');
+        if (emptyMessage) emptyMessage.remove();
+
+        const starsHtml = Array(5).fill(0).map((_, i) =>
+            `<i class="bi bi-star${i < review.hodnotenie ? '-fill' : ''}"></i>`
+        ).join('');
+
+        const reviewHtml = `
+            <div class="mb-3 pb-3 border-bottom review-item" style="animation: fadeIn 0.5s ease">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>${escapeHtml(review.user_name)}</strong>
+                        <div class="text-warning">${starsHtml}</div>
+                    </div>
+                    <small class="text-muted">${review.created_at}</small>
+                </div>
+                ${review.komentar ? `<p class="mt-2 mb-0">${escapeHtml(review.komentar)}</p>` : ''}
+            </div>
+        `;
+
+        reviewsContainer.insertAdjacentHTML('afterbegin', reviewHtml);
+    }
+
+    function updateAverageRating(newAverage, reviewCount) {
+        const ratingDisplay = document.getElementById('averageRating');
+        if (ratingDisplay && newAverage) {
+            const starsHtml = Array(5).fill(0).map((_, i) => {
+                if (i + 1 <= newAverage) return '<i class="bi bi-star-fill"></i>';
+                if (i + 0.5 <= newAverage) return '<i class="bi bi-star-half"></i>';
+                return '<i class="bi bi-star"></i>';
+            }).join('');
+
+            ratingDisplay.innerHTML = `
+                <span class="text-warning">${starsHtml}</span>
+                <small class="text-muted">(${newAverage.toFixed(1)} z ${reviewCount} hodnoteni)</small>
+            `;
+        }
+
+        // Aktualizovat header
+        if (reviewsHeader) {
+            reviewsHeader.innerHTML = `<i class="bi bi-star"></i> Hodnotenia (${reviewCount})`;
+        }
+    }
+
+    function showReviewAlert(message, type) {
+        const alertContainer = document.getElementById('reviewAlerts');
+        if (!alertContainer) return;
+
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        alertContainer.innerHTML = alertHtml;
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            const alert = alertContainer.querySelector('.alert');
+            if (alert) {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 5000);
+    }
+}
+
+// Inicializacia AJAX funkcii na konci suboru
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('AJAX init starting...');
+    initAjaxFilter();
+    initAjaxReview();
+    console.log('AJAX init done');
+});

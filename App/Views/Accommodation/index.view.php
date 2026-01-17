@@ -5,38 +5,53 @@
 ?>
 
 <div class="container py-5">
-    <h1 class="mb-4">Ubytovanie pod Roháčmi</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Ubytovanie pod Roháčmi</h1>
+        <span class="badge bg-primary fs-6">
+            <span id="resultCount"><?= count($accommodations) ?></span> ubytovaní
+        </span>
+    </div>
 
-    <!-- Filtračný formulár -->
+    <!-- AJAX Filtračný formulár -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="GET" action="<?= $link->url('accommodation.index') ?>">
+            <form id="accommodationFilterForm">
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label for="kapacita" class="form-label">Minimálna kapacita</label>
-                        <input type="number" class="form-control" id="kapacita" name="kapacita" 
-                               min="1" value="<?= htmlspecialchars($filters['kapacita'] ?? '') ?>" 
+                        <input type="number" class="form-control" id="kapacita" name="kapacita"
+                               min="1" value="<?= htmlspecialchars($filters['kapacita'] ?? '') ?>"
                                placeholder="Počet osôb">
                     </div>
                     <div class="col-md-3">
                         <label for="max_cena" class="form-label">Maximálna cena/noc</label>
-                        <input type="number" class="form-control" id="max_cena" name="max_cena" 
-                               min="0" step="0.01" value="<?= htmlspecialchars($filters['max_cena'] ?? '') ?>" 
+                        <input type="number" class="form-control" id="max_cena" name="max_cena"
+                               min="0" step="0.01" value="<?= htmlspecialchars($filters['max_cena'] ?? '') ?>"
                                placeholder="€">
                     </div>
                     <div class="col-md-4">
                         <label for="vybavenie" class="form-label">Vybavenie</label>
-                        <input type="text" class="form-control" id="vybavenie" name="vybavenie" 
-                               value="<?= htmlspecialchars($filters['vybavenie'] ?? '') ?>" 
+                        <input type="text" class="form-control" id="vybavenie" name="vybavenie"
+                               value="<?= htmlspecialchars($filters['vybavenie'] ?? '') ?>"
                                placeholder="WiFi, Parkovisko...">
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
                             <i class="bi bi-search"></i> Hľadať
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()" title="Zrušiť filtre">
+                            <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                 </div>
             </form>
+            <!-- Loading indicator -->
+            <div id="filterLoading" class="text-center mt-3" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Načítavam...</span>
+                </div>
+                <p class="text-muted mt-2">Vyhľadávam ubytovania...</p>
+            </div>
         </div>
     </div>
 
@@ -49,8 +64,8 @@
         </div>
     <?php endif; ?>
 
-    <!-- Zoznam ubytovaní -->
-    <div class="row g-4">
+    <!-- Zoznam ubytovaní (AJAX container) -->
+    <div class="row g-4" id="accommodationGrid">
         <?php if (!empty($accommodations)): ?>
             <?php foreach ($accommodations as $acc): ?>
                 <div class="col-md-6 col-lg-4">

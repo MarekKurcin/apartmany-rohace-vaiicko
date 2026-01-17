@@ -47,13 +47,15 @@
                     </div>
                     
                     <?php if ($attraction->cena !== null): ?>
-                        <div class="alert alert-info">
-                            <strong><i class="bi bi-cash"></i> Vstupné:</strong>
-                            <?php if ($attraction->cena == 0): ?>
-                                <span class="text-success fw-bold">Zadarmo</span>
-                            <?php else: ?>
-                                <?= $attraction->getFormattedPrice() ?>
-                            <?php endif; ?>
+                        <div class="card bg-light mb-3">
+                            <div class="card-body py-2">
+                                <strong><i class="bi bi-cash text-info"></i> Vstupné:</strong>
+                                <?php if ($attraction->cena == 0): ?>
+                                    <span class="text-success fw-bold">Zadarmo</span>
+                                <?php else: ?>
+                                    <?= $attraction->getFormattedPrice() ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endif; ?>
                     

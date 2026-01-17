@@ -5,7 +5,9 @@ namespace App\Controllers;
 use Framework\Core\BaseController;
 use Framework\Http\Request;
 use Framework\Http\Responses\Response;
+use Framework\Http\Responses\JsonResponse;
 use App\Models\Accommodation;
+use App\Models\Review;
 use App\Models\User;
 
 class AccommodationController extends BaseController
@@ -15,11 +17,11 @@ class AccommodationController extends BaseController
      */
     public function authorize(Request $request, string $action): bool
     {
-        // Verejné akcie
-        if (in_array($action, ['index', 'show'])) {
+        // Verejné akcie (vrátane AJAX filtrovania)
+        if (in_array($action, ['index', 'show', 'filterAjax'])) {
             return true;
         }
-        
+
         // Ostatné vyžadujú prihlásenie
         return $this->app->getAuthenticator()->getUser()->isLoggedIn();
     }
@@ -344,5 +346,185 @@ class AccommodationController extends BaseController
         }
 
         return $errors;
+    }
+
+    /**
+     * AJAX API - Filtrovanie ubytovaní
+     * Vracia JSON s ubytovaniami podľa filtrov
+     */
+    public function filterAjax(Request $request): JsonResponse
+    {
+        $filters = [
+            'kapacita' => $request->value('kapacita'),
+            'max_cena' => $request->value('max_cena'),
+            'vybavenie' => $request->value('vybavenie')
+        ];
+
+        if (!empty($filters['kapacita']) || !empty($filters['max_cena']) || !empty($filters['vybavenie'])) {
+            $accommodations = Accommodation::search($filters);
+        } else {
+            $accommodations = Accommodation::getAllActive();
+        }
+
+        $result = [];
+        foreach ($accommodations as $acc) {
+            $result[] = [
+                'id' => $acc->id,
+                'nazov' => $acc->nazov,
+                'popis' => $acc->popis ? substr($acc->popis, 0, 100) . (strlen($acc->popis) > 100 ? '...' : '') : '',
+                'adresa' => $acc->adresa,
+                'kapacita' => $acc->kapacita,
+                'cena_za_noc' => number_format($acc->cena_za_noc, 2),
+                'obrazok' => $acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
+                'vybavenie' => $acc->getVybavenieArray()
+            ];
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'count' => count($result),
+            'data' => $result
+        ]);
+    }
+
+    /**
+     * AJAX API - Pridanie recenzie
+     * Uloží novú recenziu a vráti JSON odpoveď
+     */
+    public function storeReview(Request $request): JsonResponse
+    {
+        // Kontrola prihlásenia
+        if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Pre pridanie recenzie sa musíte prihlásiť'
+            ]);
+        }
+
+        $userId = $this->app->getAuthenticator()->getUser()->getId();
+        $accommodationId = (int)$request->value('accommodation_id');
+        $hodnotenie = (int)$request->value('hodnotenie');
+        $komentar = trim($request->value('komentar') ?? '');
+
+        // Validácia
+        if ($accommodationId <= 0) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Neplatné ubytovanie'
+            ]);
+        }
+
+        if ($hodnotenie < 1 || $hodnotenie > 5) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Hodnotenie musí byť od 1 do 5'
+            ]);
+        }
+
+        // Kontrola či ubytovanie existuje
+        $accommodation = Accommodation::getOne($accommodationId);
+        if (!$accommodation) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Ubytovanie neexistuje'
+            ]);
+        }
+
+        // Kontrola či už používateľ nehodnotil
+        if (Review::hasUserReviewed($userId, $accommodationId)) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Toto ubytovanie ste už hodnotili'
+            ]);
+        }
+
+        // Uloženie recenzie
+        try {
+            $review = new Review();
+            $review->user_id = $userId;
+            $review->accommodation_id = $accommodationId;
+            $review->hodnotenie = $hodnotenie;
+            $review->komentar = htmlspecialchars($komentar);
+            $review->created_at = date('Y-m-d H:i:s');
+            $review->save();
+
+            // Získanie mena používateľa pre odpoveď
+            $user = User::getOne($userId);
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Recenzia bola úspešne pridaná',
+                'review' => [
+                    'id' => $review->id,
+                    'hodnotenie' => $review->hodnotenie,
+                    'komentar' => $review->komentar,
+                    'user_name' => $user ? $user->meno : 'Používateľ',
+                    'created_at' => date('d.m.Y')
+                ],
+                'newAverage' => $accommodation->getAverageRating(),
+                'reviewCount' => count($accommodation->getReviews())
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Nastala chyba pri ukladaní recenzie'
+            ]);
+        }
+    }
+
+    /**
+     * AJAX API - Vymazanie recenzie (len admin)
+     */
+    public function deleteReview(Request $request): JsonResponse
+    {
+        // Kontrola prihlásenia
+        if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Nie ste prihlásený'
+            ]);
+        }
+
+        // Kontrola admin práv
+        $userId = $this->app->getAuthenticator()->getUser()->getId();
+        $currentUser = User::getOne($userId);
+
+        if (!$currentUser || !$currentUser->isAdmin()) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Nemáte oprávnenie mazať recenzie'
+            ]);
+        }
+
+        $reviewId = (int)$request->value('review_id');
+
+        if ($reviewId <= 0) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Neplatná recenzia'
+            ]);
+        }
+
+        $review = Review::getOne($reviewId);
+
+        if (!$review) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Recenzia neexistuje'
+            ]);
+        }
+
+        try {
+            $review->delete();
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Recenzia bola vymazaná'
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Nastala chyba pri mazaní recenzie'
+            ]);
+        }
     }
 }
