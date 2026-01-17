@@ -24,7 +24,8 @@
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="<?= $link->url('accommodation.update', ['id' => $accommodation->id]) ?>">
+                    <form method="POST" action="<?= $link->url('accommodation.update', ['id' => $accommodation->id]) ?>"
+                          enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="nazov" class="form-label">Názov ubytovania *</label>
                             <input type="text" class="form-control <?= isset($errors['nazov']) ? 'is-invalid' : '' ?>" 
@@ -84,12 +85,30 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="obrazok" class="form-label">URL obrázku</label>
-                            <input type="url" class="form-control" 
-                                   id="obrazok" name="obrazok" 
-                                   value="<?= htmlspecialchars($old['obrazok'] ?? $accommodation->obrazok ?? '') ?>"
-                                   placeholder="https://example.com/image.jpg">
-                            <small class="text-muted">Zadajte URL adresu obrázku</small>
+                            <label class="form-label">Fotografia ubytovania</label>
+                            <?php if ($accommodation->obrazok): ?>
+                                <div class="mb-2">
+                                    <img src="<?= htmlspecialchars($accommodation->obrazok) ?>"
+                                         alt="Aktualna fotografia"
+                                         class="img-thumbnail"
+                                         style="max-height: 150px;">
+                                    <p class="text-muted small mt-1">Aktualna fotografia (nahrajte novu alebo zadajte URL pre zmenu)</p>
+                                </div>
+                            <?php endif; ?>
+                            <div class="mb-2">
+                                <label for="obrazok" class="form-label small text-muted">Nahrat subor:</label>
+                                <input type="file" class="form-control"
+                                       id="obrazok" name="obrazok"
+                                       accept="image/jpeg,image/png,image/webp">
+                                <small class="text-muted">Povolene formaty: JPG, PNG, WebP. Max velkost: 5MB</small>
+                            </div>
+                            <div class="mb-2">
+                                <label for="obrazok_url" class="form-label small text-muted">Alebo zadat URL:</label>
+                                <input type="url" class="form-control"
+                                       id="obrazok_url" name="obrazok_url"
+                                       value="<?= htmlspecialchars($old['obrazok_url'] ?? '') ?>"
+                                       placeholder="https://example.com/obrazok.jpg">
+                            </div>
                         </div>
 
                         <div class="mb-3">

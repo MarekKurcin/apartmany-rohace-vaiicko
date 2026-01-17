@@ -97,11 +97,24 @@ class AccommodationController extends BaseController
 
         $errors = $this->validate($request);
 
+        $imageResult = $this->handleImageUpload();
+        if ($imageResult['error']) {
+            $errors['obrazok'] = $imageResult['error'];
+        }
+
         if (!empty($errors)) {
             return $this->html([
                 'errors' => $errors,
                 'old' => $request->post()
             ], viewName: 'create');
+        }
+
+        // Urcenie obrazka - priorita: upload > URL
+        $obrazok = null;
+        if ($imageResult['path']) {
+            $obrazok = $imageResult['path'];
+        } elseif ($request->value('obrazok_url')) {
+            $obrazok = htmlspecialchars(trim($request->value('obrazok_url')));
         }
 
         $accommodation = new Accommodation();
@@ -112,7 +125,7 @@ class AccommodationController extends BaseController
         $accommodation->kapacita = (int)$request->value('kapacita');
         $accommodation->cena_za_noc = (float)$request->value('cena_za_noc');
         $accommodation->vybavenie = htmlspecialchars(trim($request->value('vybavenie')));
-        $accommodation->obrazok = $request->value('obrazok');
+        $accommodation->obrazok = $obrazok;
         $accommodation->aktivne = true;
 
         try {
@@ -172,6 +185,11 @@ class AccommodationController extends BaseController
 
         $errors = $this->validate($request);
 
+        $imageResult = $this->handleImageUpload();
+        if ($imageResult['error']) {
+            $errors['obrazok'] = $imageResult['error'];
+        }
+
         if (!empty($errors)) {
             return $this->html([
                 'errors' => $errors,
@@ -186,7 +204,16 @@ class AccommodationController extends BaseController
         $accommodation->kapacita = (int)$request->value('kapacita');
         $accommodation->cena_za_noc = (float)$request->value('cena_za_noc');
         $accommodation->vybavenie = htmlspecialchars(trim($request->value('vybavenie')));
-        $accommodation->obrazok = $request->value('obrazok');
+
+        // Aktualizacia obrazka - priorita: upload > URL > ponechat povodny
+        if ($imageResult['path']) {
+            $this->deleteOldImage($accommodation->obrazok);
+            $accommodation->obrazok = $imageResult['path'];
+        } elseif ($request->value('obrazok_url')) {
+            $this->deleteOldImage($accommodation->obrazok);
+            $accommodation->obrazok = htmlspecialchars(trim($request->value('obrazok_url')));
+        }
+
         $accommodation->aktivne = $request->value('aktivne') ? true : false;
 
         try {
@@ -220,10 +247,72 @@ class AccommodationController extends BaseController
         }
 
         try {
+            $this->deleteOldImage($accommodation->obrazok);
             $accommodation->delete();
             return $this->redirect($this->url('accommodation.index', ['success' => 'deleted']));
         } catch (\Exception $e) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'delete_failed']));
+        }
+    }
+
+    /**
+     * Spracovanie uploadu obrazka
+     * @return array ['path' => string|null, 'error' => string|null]
+     */
+    private function handleImageUpload(): array
+    {
+        if (!isset($_FILES['obrazok']) || $_FILES['obrazok']['error'] === UPLOAD_ERR_NO_FILE) {
+            return ['path' => null, 'error' => null];
+        }
+
+        $file = $_FILES['obrazok'];
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return ['path' => null, 'error' => 'Chyba pri nahravani suboru'];
+        }
+
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return ['path' => null, 'error' => 'Povolene su len JPG, PNG a WebP obrazky'];
+        }
+
+        $maxSize = 5 * 1024 * 1024;
+        if ($file['size'] > $maxSize) {
+            return ['path' => null, 'error' => 'Maximalna velkost suboru je 5MB'];
+        }
+
+        $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $extension = $extensions[$mimeType];
+        $newFilename = uniqid('acc_') . '_' . time() . '.' . $extension;
+
+        $uploadDir = __DIR__ . '/../../public/uploads/accommodations/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $destination = $uploadDir . $newFilename;
+
+        if (move_uploaded_file($file['tmp_name'], $destination)) {
+            return ['path' => '/uploads/accommodations/' . $newFilename, 'error' => null];
+        }
+
+        return ['path' => null, 'error' => 'Nepodarilo sa ulozit subor'];
+    }
+
+    /**
+     * Vymazanie stareho obrazka
+     */
+    private function deleteOldImage(?string $imagePath): void
+    {
+        if ($imagePath && strpos($imagePath, '/uploads/accommodations/') === 0) {
+            $fullPath = __DIR__ . '/../../public' . $imagePath;
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
         }
     }
 

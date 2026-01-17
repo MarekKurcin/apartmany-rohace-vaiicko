@@ -88,11 +88,24 @@ class AttractionController extends BaseController
 
         $errors = $this->validate($request);
 
+        $imageResult = $this->handleImageUpload();
+        if ($imageResult['error']) {
+            $errors['obrazok'] = $imageResult['error'];
+        }
+
         if (!empty($errors)) {
             return $this->html([
                 'errors' => $errors,
                 'old' => $request->post()
             ], viewName: 'create');
+        }
+
+        // Urcenie obrazka - priorita: upload > URL
+        $obrazok = null;
+        if ($imageResult['path']) {
+            $obrazok = $imageResult['path'];
+        } elseif ($request->value('obrazok_url')) {
+            $obrazok = htmlspecialchars(trim($request->value('obrazok_url')));
         }
 
         $attraction = new Attraction();
@@ -101,7 +114,7 @@ class AttractionController extends BaseController
         $attraction->typ = htmlspecialchars(trim($request->value('typ') ?? ""));
         $attraction->cena = (int)$request->value('cena') ?? "0";
         $attraction->poloha = htmlspecialchars(trim($request->value('poloha') ?? ""));
-        $attraction->obrazok = $request->value('obrazok') ? htmlspecialchars(trim($request->value('obrazok'))) : null;
+        $attraction->obrazok = $obrazok;
 
         try {
             $attraction->save();
@@ -148,6 +161,11 @@ class AttractionController extends BaseController
 
         $errors = $this->validate($request);
 
+        $imageResult = $this->handleImageUpload();
+        if ($imageResult['error']) {
+            $errors['obrazok'] = $imageResult['error'];
+        }
+
         if (!empty($errors)) {
             return $this->html([
                 'errors' => $errors,
@@ -161,7 +179,15 @@ class AttractionController extends BaseController
         $attraction->typ = htmlspecialchars(trim($request->value('typ')));
         $attraction->cena = (int)$request->value('cena');
         $attraction->poloha = htmlspecialchars(trim($request->value('poloha')));
-        $attraction->obrazok = $request->value('obrazok') ? htmlspecialchars(trim($request->value('obrazok'))) : null;
+
+        // Aktualizacia obrazka - priorita: upload > URL > ponechat povodny
+        if ($imageResult['path']) {
+            $this->deleteOldImage($attraction->obrazok);
+            $attraction->obrazok = $imageResult['path'];
+        } elseif ($request->value('obrazok_url')) {
+            $this->deleteOldImage($attraction->obrazok);
+            $attraction->obrazok = htmlspecialchars(trim($request->value('obrazok_url')));
+        }
 
         try {
             $attraction->save();
@@ -188,10 +214,72 @@ class AttractionController extends BaseController
         }
 
         try {
+            $this->deleteOldImage($attraction->obrazok);
             $attraction->delete();
             return $this->redirect($this->url('attraction.index', ['success' => 'deleted']));
         } catch (\Exception $e) {
             return $this->redirect($this->url('attraction.index', ['error' => 'delete_failed']));
+        }
+    }
+
+    /**
+     * Spracovanie uploadu obrazka
+     * @return array ['path' => string|null, 'error' => string|null]
+     */
+    private function handleImageUpload(): array
+    {
+        if (!isset($_FILES['obrazok']) || $_FILES['obrazok']['error'] === UPLOAD_ERR_NO_FILE) {
+            return ['path' => null, 'error' => null];
+        }
+
+        $file = $_FILES['obrazok'];
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return ['path' => null, 'error' => 'Chyba pri nahravani suboru'];
+        }
+
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return ['path' => null, 'error' => 'Povolene su len JPG, PNG a WebP obrazky'];
+        }
+
+        $maxSize = 5 * 1024 * 1024;
+        if ($file['size'] > $maxSize) {
+            return ['path' => null, 'error' => 'Maximalna velkost suboru je 5MB'];
+        }
+
+        $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $extension = $extensions[$mimeType];
+        $newFilename = uniqid('attr_') . '_' . time() . '.' . $extension;
+
+        $uploadDir = __DIR__ . '/../../public/uploads/attractions/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $destination = $uploadDir . $newFilename;
+
+        if (move_uploaded_file($file['tmp_name'], $destination)) {
+            return ['path' => '/uploads/attractions/' . $newFilename, 'error' => null];
+        }
+
+        return ['path' => null, 'error' => 'Nepodarilo sa ulozit subor'];
+    }
+
+    /**
+     * Vymazanie stareho obrazka
+     */
+    private function deleteOldImage(?string $imagePath): void
+    {
+        if ($imagePath && strpos($imagePath, '/uploads/attractions/') === 0) {
+            $fullPath = __DIR__ . '/../../public' . $imagePath;
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
         }
     }
 

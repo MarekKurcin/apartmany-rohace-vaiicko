@@ -34,8 +34,8 @@ $old = $old ?? [];
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="<?= $link->url('accommodation.store') ?>" 
-                          id="accommodationForm" novalidate>
+                    <form method="POST" action="<?= $link->url('accommodation.store') ?>"
+                          id="accommodationForm" enctype="multipart/form-data" novalidate>
                         
                         <div class="mb-3">
                             <label for="nazov" class="form-label">Názov ubytovania *</label>
@@ -109,13 +109,25 @@ $old = $old ?? [];
                         </div>
 
                         <div class="mb-3">
-                            <label for="obrazok" class="form-label">URL obrázka</label>
-                            <input type="url" 
-                                   class="form-control" 
-                                   id="obrazok" 
-                                   name="obrazok" 
-                                   value="<?= htmlspecialchars($old['obrazok'] ?? '') ?>"
-                                   placeholder="https://...">
+                            <label class="form-label">Fotografia ubytovania</label>
+                            <div class="mb-2">
+                                <label for="obrazok" class="form-label small text-muted">Nahrat subor:</label>
+                                <input type="file"
+                                       class="form-control"
+                                       id="obrazok"
+                                       name="obrazok"
+                                       accept="image/jpeg,image/png,image/webp">
+                                <small class="text-muted">Povolene formaty: JPG, PNG, WebP. Max velkost: 5MB</small>
+                            </div>
+                            <div class="mb-2">
+                                <label for="obrazok_url" class="form-label small text-muted">Alebo zadat URL:</label>
+                                <input type="url"
+                                       class="form-control"
+                                       id="obrazok_url"
+                                       name="obrazok_url"
+                                       value="<?= htmlspecialchars($old['obrazok_url'] ?? '') ?>"
+                                       placeholder="https://example.com/obrazok.jpg">
+                            </div>
                         </div>
 
                         <div class="mb-3 form-check">

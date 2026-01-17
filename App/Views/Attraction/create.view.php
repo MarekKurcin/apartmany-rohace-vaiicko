@@ -32,7 +32,8 @@ $errors = $errors ?? [];
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="<?= $link->url('attraction.store') ?>" novalidate>
+                    <form method="POST" action="<?= $link->url('attraction.store') ?>"
+                          enctype="multipart/form-data" novalidate>
                         <div class="mb-3">
                             <label for="nazov" class="form-label">Názov atrakcie *</label>
                             <input type="text" 
@@ -69,13 +70,25 @@ $errors = $errors ?? [];
                         </div>
 
                         <div class="mb-3">
-                            <label for="obrazok" class="form-label">URL obrázka</label>
-                            <input type="url" 
-                                   class="form-control" 
-                                   id="obrazok" 
-                                   name="obrazok" 
-                                   value="<?= htmlspecialchars($_POST['obrazok'] ?? '') ?>"
-                                   placeholder="https://...">
+                            <label class="form-label">Fotografia atrakcie</label>
+                            <div class="mb-2">
+                                <label for="obrazok" class="form-label small text-muted">Nahrat subor:</label>
+                                <input type="file"
+                                       class="form-control"
+                                       id="obrazok"
+                                       name="obrazok"
+                                       accept="image/jpeg,image/png,image/webp">
+                                <small class="text-muted">Povolene formaty: JPG, PNG, WebP. Max velkost: 5MB</small>
+                            </div>
+                            <div class="mb-2">
+                                <label for="obrazok_url" class="form-label small text-muted">Alebo zadat URL:</label>
+                                <input type="url"
+                                       class="form-control"
+                                       id="obrazok_url"
+                                       name="obrazok_url"
+                                       value="<?= htmlspecialchars($_POST['obrazok_url'] ?? '') ?>"
+                                       placeholder="https://example.com/obrazok.jpg">
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2">
