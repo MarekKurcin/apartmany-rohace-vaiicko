@@ -84,8 +84,8 @@
         <div class="row g-4">
             <?php if (!empty($featuredAttractions)): ?>
                 <?php foreach ($featuredAttractions as $attr): ?>
-                    <div class="col-md-4">
-                        <div class="attraction-card">
+                    <div class="col-md-4 d-flex">
+                        <div class="attraction-card w-100">
                             <div class="attraction-image" style="background-image: url('<?= htmlspecialchars($attr->obrazok ?? 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800') ?>');">
                                 <span class="attraction-badge"><?= htmlspecialchars($attr->typ ?? 'Iné') ?></span>
                             </div>
@@ -118,20 +118,20 @@
         <h2 class="section-title text-center mb-5">Odporúčané ubytovanie</h2>
         <div class="row g-4">
             <?php foreach ($featuredAccommodations as $acc): ?>
-                <div class="col-md-4">
-                    <div class="accommodation-card">
+                <div class="col-md-4 d-flex">
+                    <div class="accommodation-card w-100">
                         <div class="accommodation-image" style="background-image: url('<?= htmlspecialchars($acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800') ?>');">
                             <span class="price-badge"><?= number_format($acc->cena_za_noc, 2) ?> €/noc</span>
                         </div>
-                        <div class="card-body">
-                            <h5 class="card-title"><?= htmlspecialchars($acc->nazov) ?></h5>
-                            <p class="text-muted mb-2 odsek-test">
+                        <div class="accommodation-content p-3">
+                            <h5><?= htmlspecialchars($acc->nazov) ?></h5>
+                            <p class="text-muted mb-2">
                                 <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($acc->adresa) ?>
                             </p>
                             <p class="text-muted mb-2">
                                 <i class="bi bi-people"></i> Kapacita: <?= $acc->kapacita ?> osôb
                             </p>
-                            <div class="accommodation-features">
+                            <div class="accommodation-features mb-3">
                                 <?php
                                 $features = $acc->getVybavenieArray();
                                 foreach (array_slice($features, 0, 3) as $feature):
@@ -142,11 +142,9 @@
                                     <span class="badge bg-light text-dark">+<?= count($features) - 3 ?></span>
                                 <?php endif; ?>
                             </div>
-                            <div class="mt-3">
-                                <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>" class="btn btn-outline-primary w-100">
-                                    Zobraziť detail
-                                </a>
-                            </div>
+                            <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>" class="btn btn-sm btn-outline-primary">
+                                Viac info <i class="bi bi-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

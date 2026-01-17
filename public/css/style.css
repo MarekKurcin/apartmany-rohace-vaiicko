@@ -108,6 +108,10 @@
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--transition);
+    background: var(--white);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .accommodation-card:hover {
@@ -121,6 +125,24 @@
     background-position: center;
     background-color: #e9ecef;
     position: relative;
+    flex-shrink: 0;
+}
+
+.accommodation-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.accommodation-content h5 {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.accommodation-content .btn {
+    align-self: flex-start;
+    margin-top: auto;
 }
 
 .price-badge {
@@ -136,7 +158,7 @@
 }
 
 .accommodation-features {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
 }
 
 .accommodation-features .badge {
@@ -152,18 +174,48 @@
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--transition);
+    background: var(--white);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .attraction-card:hover {
-    transform: scale(1.03);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .attraction-image {
-    height: 180px;
+    height: 200px;
     background-size: cover;
     background-position: center;
     background-color: #e9ecef;
     position: relative;
+    flex-shrink: 0;
+}
+
+.attraction-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.attraction-content h5 {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.attraction-content p {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    flex-grow: 1;
+    margin-bottom: 1rem;
+}
+
+.attraction-content .btn {
+    align-self: flex-start;
+    margin-top: auto;
 }
 
 .attraction-badge {
