@@ -5,20 +5,21 @@ namespace App\Controllers;
 use Framework\Core\BaseController;
 use Framework\Http\Request;
 use Framework\Http\Responses\Response;
+use Framework\Http\Responses\JsonResponse;
 use App\Models\Attraction;
 
 class AttractionController extends BaseController
 {
     /**
-     * Autorizácia - index a show sú verejné, ostatné len pre adminov
+     * Autorizácia - index, show a filterAjax sú verejné, ostatné len pre adminov
      */
     public function authorize(Request $request, string $action): bool
     {
         // Verejné akcie
-        if (in_array($action, ['index', 'show'])) {
+        if (in_array($action, ['index', 'show', 'filterAjax'])) {
             return true;
         }
-        
+
         // Ostatné len pre adminov
         return $this->checkAdmin();
     }
@@ -28,20 +29,54 @@ class AttractionController extends BaseController
      */
     public function index(Request $request): Response
     {
-        $typ = $request->value('typ');
-        
-        if ($typ) {
-            $attractions = Attraction::getByType($typ);
-        } else {
-            $attractions = Attraction::getAllAttractions();
-        }
+        $filters = [
+            'typ' => $request->value('typ'),
+            'cena_filter' => $request->value('cena_filter'),
+            'zoradenie' => $request->value('zoradenie') ?: 'najnovsie'
+        ];
 
+        $attractions = Attraction::searchWithFilters($filters);
         $types = Attraction::getAllTypes();
-        
+
         return $this->html([
             'attractions' => $attractions,
             'types' => $types,
-            'selectedType' => $typ
+            'filters' => $filters
+        ]);
+    }
+
+    /**
+     * AJAX API - Filtrovanie atrakcií
+     */
+    public function filterAjax(Request $request): JsonResponse
+    {
+        $filters = [
+            'typ' => $request->value('typ'),
+            'cena_filter' => $request->value('cena_filter'),
+            'zoradenie' => $request->value('zoradenie') ?: 'najnovsie'
+        ];
+
+        $attractions = Attraction::searchWithFilters($filters);
+
+        $result = [];
+        foreach ($attractions as $attr) {
+            $result[] = [
+                'id' => $attr->id,
+                'nazov' => $attr->nazov,
+                'popis' => $attr->popis ? substr($attr->popis, 0, 120) . (strlen($attr->popis) > 120 ? '...' : '') : '',
+                'typ' => $attr->typ,
+                'cena' => $attr->cena,
+                'cena_formatted' => $attr->getFormattedPrice(),
+                'poloha' => $attr->poloha,
+                'obrazok' => $attr->obrazok ?? 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+                'is_free' => $attr->isFree()
+            ];
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'count' => count($result),
+            'data' => $result
         ]);
     }
 

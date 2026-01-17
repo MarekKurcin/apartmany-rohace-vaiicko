@@ -31,20 +31,26 @@ class AccommodationController extends BaseController
      */
     public function index(Request $request): Response
     {
+        // Spracovanie vybavenia z checkboxov
+        $vybavenieArr = $request->value('vybavenie_arr');
+        $vybavenie = '';
+        if (is_array($vybavenieArr) && !empty($vybavenieArr)) {
+            $vybavenie = implode(',', $vybavenieArr);
+        } elseif ($request->value('vybavenie')) {
+            $vybavenie = $request->value('vybavenie');
+        }
+
         // Získanie filtrov z GET
         $filters = [
             'kapacita' => $request->value('kapacita'),
             'max_cena' => $request->value('max_cena'),
-            'vybavenie' => $request->value('vybavenie')
+            'vybavenie' => $vybavenie,
+            'zoradenie' => $request->value('zoradenie') ?: 'najnovsie'
         ];
-        
-        // Ak sú zadané filtre, použijeme vyhľadávanie
-        if (!empty($filters['kapacita']) || !empty($filters['max_cena']) || !empty($filters['vybavenie'])) {
-            $accommodations = Accommodation::search($filters);
-        } else {
-            $accommodations = Accommodation::getAllActive();
-        }
-        
+
+        // Vyhľadávanie s filtrami
+        $accommodations = Accommodation::search($filters);
+
         return $this->html([
             'accommodations' => $accommodations,
             'filters' => $filters
@@ -354,17 +360,23 @@ class AccommodationController extends BaseController
      */
     public function filterAjax(Request $request): JsonResponse
     {
+        // Spracovanie vybavenia z checkboxov
+        $vybavenieArr = $request->value('vybavenie_arr');
+        $vybavenie = '';
+        if (is_array($vybavenieArr) && !empty($vybavenieArr)) {
+            $vybavenie = implode(',', $vybavenieArr);
+        } elseif ($request->value('vybavenie')) {
+            $vybavenie = $request->value('vybavenie');
+        }
+
         $filters = [
             'kapacita' => $request->value('kapacita'),
             'max_cena' => $request->value('max_cena'),
-            'vybavenie' => $request->value('vybavenie')
+            'vybavenie' => $vybavenie,
+            'zoradenie' => $request->value('zoradenie') ?: 'najnovsie'
         ];
 
-        if (!empty($filters['kapacita']) || !empty($filters['max_cena']) || !empty($filters['vybavenie'])) {
-            $accommodations = Accommodation::search($filters);
-        } else {
-            $accommodations = Accommodation::getAllActive();
-        }
+        $accommodations = Accommodation::search($filters);
 
         $result = [];
         foreach ($accommodations as $acc) {

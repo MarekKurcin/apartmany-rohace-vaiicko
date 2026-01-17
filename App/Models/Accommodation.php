@@ -80,12 +80,41 @@ class Accommodation extends Model
         }
 
         if (!empty($filters['vybavenie'])) {
-            $where[] = "vybavenie LIKE ?";
-            $params[] = '%' . $filters['vybavenie'] . '%';
+            // Rozdelíme vybavenie na jednotlivé položky a hľadáme všetky
+            $vybavenieItems = array_map('trim', explode(',', $filters['vybavenie']));
+            foreach ($vybavenieItems as $item) {
+                if (!empty($item)) {
+                    $where[] = "vybavenie LIKE ?";
+                    $params[] = '%' . $item . '%';
+                }
+            }
+        }
+
+        // Zoradenie
+        $orderBy = "id DESC"; // default
+        if (!empty($filters['zoradenie'])) {
+            switch ($filters['zoradenie']) {
+                case 'cena_asc':
+                    $orderBy = "cena_za_noc ASC";
+                    break;
+                case 'cena_desc':
+                    $orderBy = "cena_za_noc DESC";
+                    break;
+                case 'kapacita_asc':
+                    $orderBy = "kapacita ASC";
+                    break;
+                case 'kapacita_desc':
+                    $orderBy = "kapacita DESC";
+                    break;
+                case 'najnovsie':
+                default:
+                    $orderBy = "id DESC";
+                    break;
+            }
         }
 
         $whereString = implode(" AND ", $where);
-        return self::getAll($whereString, $params, "id DESC");
+        return self::getAll($whereString, $params, $orderBy);
     }
 
     /**

@@ -83,6 +83,56 @@ class Attraction extends Model
     }
 
     /**
+     * Vyhľadávanie s filtrami
+     */
+    public static function searchWithFilters(array $filters = []): array
+    {
+        $where = [];
+        $params = [];
+
+        // Filter podľa typu
+        if (!empty($filters['typ'])) {
+            $where[] = "typ = ?";
+            $params[] = $filters['typ'];
+        }
+
+        // Filter podľa ceny
+        if (!empty($filters['cena_filter'])) {
+            if ($filters['cena_filter'] === 'zadarmo') {
+                $where[] = "(cena = 0 OR cena IS NULL)";
+            } elseif ($filters['cena_filter'] === 'platene') {
+                $where[] = "cena > 0";
+            }
+        }
+
+        // Zoradenie
+        $orderBy = "id DESC";
+        if (!empty($filters['zoradenie'])) {
+            switch ($filters['zoradenie']) {
+                case 'nazov_asc':
+                    $orderBy = "nazov ASC";
+                    break;
+                case 'nazov_desc':
+                    $orderBy = "nazov DESC";
+                    break;
+                case 'cena_asc':
+                    $orderBy = "cena ASC";
+                    break;
+                case 'cena_desc':
+                    $orderBy = "cena DESC";
+                    break;
+                case 'najnovsie':
+                default:
+                    $orderBy = "id DESC";
+                    break;
+            }
+        }
+
+        $whereString = !empty($where) ? implode(" AND ", $where) : null;
+        return self::getAll($whereString, $params, $orderBy);
+    }
+
+    /**
      * Získať atrakcie v okolí (podľa polohy)
      */
     public static function getByLocation(string $poloha): array

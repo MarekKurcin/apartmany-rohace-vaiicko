@@ -476,21 +476,26 @@ function initAjaxFilter() {
     if (!filterForm) return;
 
     const accommodationGrid = document.getElementById('accommodationGrid');
-    const loadingIndicator = document.getElementById('filterLoading');
 
     filterForm.addEventListener('submit', function(e) {
         e.preventDefault();
         filterAccommodations();
     });
 
-    // Live filtrovanie pri zmene inputov (s debounce)
+    // Live filtrovanie pri zmene selectov a checkboxov
     let debounceTimer;
-    filterForm.querySelectorAll('input, select').forEach(input => {
-        input.addEventListener('input', function() {
+    filterForm.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', function() {
             clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                filterAccommodations();
-            }, 500);
+            debounceTimer = setTimeout(() => filterAccommodations(), 300);
+        });
+    });
+
+    // Checkboxy pre vybavenie - okamžité filtrovanie
+    filterForm.querySelectorAll('.vybavenie-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => filterAccommodations(), 300);
         });
     });
 
@@ -502,9 +507,9 @@ function initAjaxFilter() {
             if (value) params.append(key, value);
         });
 
-        if (loadingIndicator) loadingIndicator.style.display = 'block';
+        const url = `index.php?c=Accommodation&a=filterAjax&${params.toString()}`;
 
-        fetch(`?c=Accommodation&a=filterAjax&${params.toString()}`, {
+        fetch(url, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -512,28 +517,32 @@ function initAjaxFilter() {
         })
         .then(response => response.json())
         .then(data => {
-            if (loadingIndicator) loadingIndicator.style.display = 'none';
-
             if (data.success) {
                 renderAccommodations(data.data, data.count);
             } else {
-                showFilterError('Nastala chyba pri nacitavani');
+                showFilterError('Nastala chyba pri načítavaní');
             }
         })
         .catch(error => {
-            if (loadingIndicator) loadingIndicator.style.display = 'none';
             console.error('AJAX Filter Error:', error);
-            showFilterError('Nastala chyba pri komunikacii so serverom');
+            showFilterError('Nastala chyba pri komunikácii so serverom');
         });
     }
 
     function renderAccommodations(accommodations, count) {
         if (!accommodationGrid) return;
 
-        // Aktualizacia poctu vysledkov
+        // Aktualizacia poctu vysledkov s gramaticky správnym textom
         const countBadge = document.getElementById('resultCount');
+        const resultBadge = document.getElementById('resultBadge');
         if (countBadge) {
             countBadge.textContent = count;
+        }
+        if (resultBadge) {
+            let text = 'ubytovaní';
+            if (count == 1) text = 'ubytovanie';
+            else if (count >= 2 && count <= 4) text = 'ubytovania';
+            resultBadge.innerHTML = `<i class="bi bi-building"></i> <span id="resultCount">${count}</span> ${text}`;
         }
 
         if (accommodations.length === 0) {
@@ -624,7 +633,20 @@ function initAjaxFilter() {
 function clearFilters() {
     const filterForm = document.getElementById('accommodationFilterForm');
     if (filterForm) {
+        // Reset všetkých inputov
         filterForm.reset();
+
+        // Explicitne resetuj selecty na prvú hodnotu
+        filterForm.querySelectorAll('select').forEach(select => {
+            select.selectedIndex = 0;
+        });
+
+        // Odškrtni všetky checkboxy
+        filterForm.querySelectorAll('.vybavenie-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Spusti filtrovanie
         filterForm.dispatchEvent(new Event('submit'));
     }
 }
@@ -700,7 +722,7 @@ function initAjaxReview() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Odosielam...';
 
-        fetch('?c=Accommodation&a=storeReview', {
+        fetch('index.php?c=Accommodation&a=storeReview', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -814,8 +836,129 @@ function initAjaxReview() {
 
 // Inicializacia AJAX funkcii na konci suboru
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('AJAX init starting...');
     initAjaxFilter();
     initAjaxReview();
-    console.log('AJAX init done');
+    initAttractionFilter();
 });
+
+/**
+ * AJAX Filtrovanie atrakcii
+ */
+function initAttractionFilter() {
+    const filterForm = document.getElementById('attractionFilterForm');
+    if (!filterForm) return;
+
+    const attractionGrid = document.getElementById('attractionGrid');
+
+    filterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        filterAttractions();
+    });
+
+    // Live filtrovanie pri zmene selectov
+    filterForm.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', function() {
+            filterAttractions();
+        });
+    });
+
+    function filterAttractions() {
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams();
+
+        formData.forEach((value, key) => {
+            if (value) params.append(key, value);
+        });
+
+        const url = `index.php?c=Attraction&a=filterAjax&${params.toString()}`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderAttractions(data.data, data.count);
+            }
+        })
+        .catch(error => {
+            console.error('AJAX Attraction Filter Error:', error);
+        });
+    }
+
+    function renderAttractions(attractions, count) {
+        if (!attractionGrid) return;
+
+        // Aktualizacia poctu vysledkov
+        const resultBadge = document.getElementById('resultBadge');
+        if (resultBadge) {
+            let text = 'atrakcií';
+            if (count == 1) text = 'atrakcia';
+            else if (count >= 2 && count <= 4) text = 'atrakcie';
+            resultBadge.innerHTML = `<i class="bi bi-pin-map"></i> <span id="resultCount">${count}</span> ${text}`;
+        }
+
+        if (attractions.length === 0) {
+            attractionGrid.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info text-center" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        Nenašli sa žiadne atrakcie podľa zadaných kritérií.
+                        <br>
+                        <a href="javascript:void(0)" onclick="clearAttractionFilters()" class="alert-link">Zrušiť filtre</a>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        attractions.forEach(attr => {
+            const cenaHtml = attr.is_free
+                ? '<strong class="text-success">Zadarmo</strong>'
+                : escapeHtml(attr.cena_formatted);
+
+            html += `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="position-relative">
+                            <img src="${escapeHtml(attr.obrazok)}"
+                                 class="card-img-top"
+                                 style="height: 200px; object-fit: cover;"
+                                 alt="${escapeHtml(attr.nazov)}"
+                                 loading="lazy">
+                            ${attr.typ ? `<span class="position-absolute top-0 end-0 m-2 badge bg-info">${escapeHtml(attr.typ)}</span>` : ''}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${escapeHtml(attr.nazov)}</h5>
+                            ${attr.poloha ? `<p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> ${escapeHtml(attr.poloha)}</p>` : ''}
+                            <p class="text-muted mb-2"><i class="bi bi-tag"></i> ${cenaHtml}</p>
+                            ${attr.popis ? `<p class="card-text small">${escapeHtml(attr.popis)}</p>` : ''}
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="index.php?c=Attraction&a=show&id=${attr.id}" class="btn btn-outline-info w-100">
+                                <i class="bi bi-eye"></i> Zobraziť detail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        attractionGrid.innerHTML = html;
+    }
+}
+
+function clearAttractionFilters() {
+    const filterForm = document.getElementById('attractionFilterForm');
+    if (filterForm) {
+        filterForm.reset();
+        filterForm.querySelectorAll('select').forEach(select => {
+            select.selectedIndex = 0;
+        });
+        filterForm.dispatchEvent(new Event('submit'));
+    }
+}
