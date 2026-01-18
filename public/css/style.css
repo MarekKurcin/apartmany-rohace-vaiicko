@@ -462,10 +462,113 @@ body {
     }
 }
 
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Triedy pre fade-in animacie */
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.fade-in-left {
+    opacity: 0;
+    animation: fadeInLeft 0.6s ease forwards;
+}
+
+.fade-in-right {
+    opacity: 0;
+    animation: fadeInRight 0.6s ease forwards;
+}
+
+.fade-in-scale {
+    opacity: 0;
+    animation: fadeInScale 0.5s ease forwards;
+}
+
+/* Staggered delay pre karty - postupne zobrazenie */
+.fade-in-delay-1 { animation-delay: 0.1s; }
+.fade-in-delay-2 { animation-delay: 0.2s; }
+.fade-in-delay-3 { animation-delay: 0.3s; }
+.fade-in-delay-4 { animation-delay: 0.4s; }
+.fade-in-delay-5 { animation-delay: 0.5s; }
+.fade-in-delay-6 { animation-delay: 0.6s; }
+
+/* Karty s fade-in */
 .accommodation-card,
 .attraction-card,
 .feature-card {
+    opacity: 0;
     animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Hero content animacia */
+.hero-content {
+    animation: fadeInUp 0.8s ease 0.2s forwards;
+}
+
+.hero-title {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease 0.3s forwards;
+}
+
+.hero-subtitle {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease 0.5s forwards;
+}
+
+/* Search box animacia */
+.search-box {
+    opacity: 0;
+    animation: fadeInScale 0.6s ease 0.7s forwards;
+}
+
+/* Section title animacia */
+.section-title {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Auth card animacia */
+.auth-card {
+    opacity: 0;
+    animation: fadeInScale 0.6s ease 0.2s forwards;
+}
+
+/* Filter card animacia */
+.filter-card {
+    opacity: 0;
+    animation: fadeInLeft 0.5s ease forwards;
 }
 
 /* 17. Alert štýly */

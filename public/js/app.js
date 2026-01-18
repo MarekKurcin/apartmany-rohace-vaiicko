@@ -839,7 +839,23 @@ document.addEventListener('DOMContentLoaded', function() {
     initAjaxFilter();
     initAjaxReview();
     initAttractionFilter();
+    initStaggeredAnimations();
 });
+
+/**
+ * Staggered fade-in animacie pre karty
+ * Karty sa zobrazia postupne s oneskorenim
+ */
+function initStaggeredAnimations() {
+    // Najdi vsetky karty
+    const cards = document.querySelectorAll('.accommodation-card, .attraction-card, .feature-card');
+
+    cards.forEach((card, index) => {
+        // Delay max 0.6s (6 kariet), potom sa opakuje
+        const delayClass = `fade-in-delay-${(index % 6) + 1}`;
+        card.classList.add(delayClass);
+    });
+}
 
 /**
  * AJAX Filtrovanie atrakcii
