@@ -283,14 +283,21 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             <!-- Tlačidlá pre vlastníka/admina -->
-            <?php if (isset($user) && $user?->isLoggedIn()): ?>
+            <?php
+            $canEdit = false;
+            if (isset($user) && $user->isLoggedIn()) {
+                $currentUser = \App\Models\User::getOne($user->getId());
+                $canEdit = $currentUser && ($currentUser->isAdmin() || $accommodation->user_id == $user->getId());
+            }
+            ?>
+            <?php if ($canEdit): ?>
                 <div class="mb-3">
-                    <a href="<?= $link->url('accommodation.edit', ['id' => $accommodation->id]) ?>" 
+                    <a href="<?= $link->url('accommodation.edit', ['id' => $accommodation->id]) ?>"
                        class="btn btn-warning">
                         <i class="bi bi-pencil"></i> Upraviť
                     </a>
-                    <form method="POST" action="<?= $link->url('accommodation.delete', ['id' => $accommodation->id]) ?>" 
-                          style="display: inline;" 
+                    <form method="POST" action="<?= $link->url('accommodation.delete', ['id' => $accommodation->id]) ?>"
+                          style="display: inline;"
                           onsubmit="return confirm('Naozaj chcete vymazať toto ubytovanie?');">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Vymazať
@@ -348,6 +355,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     <small class="text-muted d-block mt-2">Rýchla a jednoduchá rezervácia</small>
                 </div>
             </div>
+
+            <!-- Kalendár dostupnosti -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar3"></i> Dostupnosť</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="prevMonth">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <span id="calendarTitle" class="fw-bold"></span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="nextMonth">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div id="availabilityCalendar"></div>
+                    <div class="mt-3 small">
+                        <span class="me-3"><span class="badge bg-success">&nbsp;</span> Voľné</span>
+                        <span class="me-3"><span class="badge bg-danger">&nbsp;</span> Obsadené</span>
+                        <span><span class="badge bg-warning">&nbsp;</span> Čaká na potvrdenie</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -362,4 +393,143 @@ document.addEventListener('DOMContentLoaded', function() {
 .text-justify {
     text-align: justify;
 }
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+.calendar-header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.75rem;
+    padding: 5px;
+    color: #666;
+}
+.calendar-day {
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    background: #e8f5e9;
+    color: #2d6a4f;
+}
+.calendar-day.booked {
+    background: #ffebee;
+    color: #c62828;
+}
+.calendar-day.pending {
+    background: #fff3e0;
+    color: #e65100;
+}
+.calendar-day.empty {
+    background: transparent;
+}
+.calendar-day.today {
+    border: 2px solid #2d6a4f;
+    font-weight: bold;
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const accommodationId = <?= $accommodation->id ?>;
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth() + 1;
+
+    const monthNames = ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún',
+                        'Júl', 'August', 'September', 'Október', 'November', 'December'];
+    const dayNames = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
+
+    function loadCalendar() {
+        const titleEl = document.getElementById('calendarTitle');
+        const calendarEl = document.getElementById('availabilityCalendar');
+
+        if (!titleEl || !calendarEl) return;
+
+        titleEl.textContent = monthNames[currentMonth - 1] + ' ' + currentYear;
+
+        fetch('?c=Accommodation&a=getAvailability&id=' + accommodationId + '&year=' + currentYear + '&month=' + currentMonth)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderCalendar(data.bookedDates);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading calendar:', error);
+            });
+    }
+
+    function renderCalendar(bookedDates) {
+        const calendarEl = document.getElementById('availabilityCalendar');
+        if (!calendarEl) return;
+
+        const firstDay = new Date(currentYear, currentMonth - 1, 1);
+        const lastDay = new Date(currentYear, currentMonth, 0);
+        const daysInMonth = lastDay.getDate();
+
+        let startDay = firstDay.getDay();
+        startDay = startDay === 0 ? 6 : startDay - 1;
+
+        const today = new Date();
+        const todayStr = today.getFullYear() + '-' +
+                        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(today.getDate()).padStart(2, '0');
+
+        let html = '<div class="calendar-grid">';
+
+        dayNames.forEach(day => {
+            html += '<div class="calendar-header">' + day + '</div>';
+        });
+
+        for (let i = 0; i < startDay; i++) {
+            html += '<div class="calendar-day empty"></div>';
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = currentYear + '-' +
+                           String(currentMonth).padStart(2, '0') + '-' +
+                           String(day).padStart(2, '0');
+
+            let classes = 'calendar-day';
+
+            if (bookedDates[dateStr]) {
+                if (bookedDates[dateStr] === 'cakajuca') {
+                    classes += ' pending';
+                } else {
+                    classes += ' booked';
+                }
+            }
+
+            if (dateStr === todayStr) {
+                classes += ' today';
+            }
+
+            html += '<div class="' + classes + '">' + day + '</div>';
+        }
+
+        html += '</div>';
+        calendarEl.innerHTML = html;
+    }
+
+    document.getElementById('prevMonth')?.addEventListener('click', function() {
+        currentMonth--;
+        if (currentMonth < 1) {
+            currentMonth = 12;
+            currentYear--;
+        }
+        loadCalendar();
+    });
+
+    document.getElementById('nextMonth')?.addEventListener('click', function() {
+        currentMonth++;
+        if (currentMonth > 12) {
+            currentMonth = 1;
+            currentYear++;
+        }
+        loadCalendar();
+    });
+
+    loadCalendar();
+});
+</script>

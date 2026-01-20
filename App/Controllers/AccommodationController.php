@@ -9,6 +9,7 @@ use Framework\Http\Responses\JsonResponse;
 use App\Models\Accommodation;
 use App\Models\Review;
 use App\Models\User;
+use App\Models\Reservation;
 
 class AccommodationController extends BaseController
 {
@@ -17,8 +18,8 @@ class AccommodationController extends BaseController
      */
     public function authorize(Request $request, string $action): bool
     {
-        // Verejné akcie (vrátane AJAX filtrovania)
-        if (in_array($action, ['index', 'show', 'filterAjax'])) {
+        // Verejné akcie (vrátane AJAX filtrovania a kalendára)
+        if (in_array($action, ['index', 'show', 'filterAjax', 'getAvailability'])) {
             return true;
         }
 
@@ -538,5 +539,72 @@ class AccommodationController extends BaseController
                 'error' => 'Nastala chyba pri mazaní recenzie'
             ]);
         }
+    }
+
+    /**
+     * AJAX API - Získanie obsadených dátumov pre kalendár
+     */
+    public function getAvailability(Request $request): JsonResponse
+    {
+        $accommodationId = (int)$request->value('id');
+        $year = (int)$request->value('year') ?: (int)date('Y');
+        $month = (int)$request->value('month') ?: (int)date('m');
+
+        if ($accommodationId <= 0) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Neplatné ID ubytovania'
+            ]);
+        }
+
+        $accommodation = Accommodation::getOne($accommodationId);
+        if (!$accommodation) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Ubytovanie neexistuje'
+            ]);
+        }
+
+        $bookedDates = Reservation::getBookedDates($accommodationId, $year, $month);
+
+        return new JsonResponse([
+            'success' => true,
+            'year' => $year,
+            'month' => $month,
+            'bookedDates' => $bookedDates
+        ]);
+    }
+
+    /**
+     * Zoznam vlastných ubytovaní pre ubytovateľa
+     */
+    public function myList(Request $request): Response
+    {
+        if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
+            return $this->redirect($this->url('auth.login'));
+        }
+
+        $userId = $this->app->getAuthenticator()->getUser()->getId();
+        $user = User::getOne($userId);
+
+        if (!$user->isUbytovatel()) {
+            return $this->redirect($this->url('home.index', ['error' => 'unauthorized']));
+        }
+
+        $accommodations = Accommodation::getAll("user_id = ?", [$userId]);
+
+        // Pridáme štatistiky ku každému ubytovaniu
+        $accommodationsWithStats = [];
+        foreach ($accommodations as $acc) {
+            $stats = Reservation::getAccommodationStats($acc->id);
+            $accommodationsWithStats[] = [
+                'accommodation' => $acc,
+                'stats' => $stats
+            ];
+        }
+
+        return $this->html([
+            'accommodations' => $accommodationsWithStats
+        ]);
     }
 }

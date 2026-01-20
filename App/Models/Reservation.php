@@ -208,4 +208,187 @@ class Reservation extends Model
             default => $this->stav
         };
     }
+
+    /**
+     * Získať mesačné štatistiky pre ubytovania
+     * @param array $accommodationIds Pole ID ubytovaní
+     * @param int $year Rok
+     * @return array Štatistiky po mesiacoch
+     */
+    public static function getMonthlyStats(array $accommodationIds, int $year): array
+    {
+        if (empty($accommodationIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($accommodationIds), '?'));
+        $params = array_merge($accommodationIds, [$year]);
+
+        $sql = "SELECT
+                    MONTH(datum_od) as mesiac,
+                    COUNT(*) as pocet_rezervacii,
+                    SUM(CASE WHEN stav IN ('potvrdena', 'dokoncena') THEN celkova_cena ELSE 0 END) as prijem,
+                    SUM(CASE WHEN stav = 'potvrdena' THEN 1 ELSE 0 END) as potvrdene,
+                    SUM(CASE WHEN stav = 'cakajuca' THEN 1 ELSE 0 END) as cakajuce,
+                    SUM(CASE WHEN stav = 'zrusena' THEN 1 ELSE 0 END) as zrusene,
+                    SUM(CASE WHEN stav = 'dokoncena' THEN 1 ELSE 0 END) as dokoncene
+                FROM reservation
+                WHERE accommodation_id IN ($placeholders)
+                AND YEAR(datum_od) = ?
+                GROUP BY MONTH(datum_od)
+                ORDER BY mesiac";
+
+        $stmt = Connection::getInstance()->prepare($sql);
+        $stmt->execute($params);
+
+        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $stats = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $stats[$i] = [
+                'mesiac' => $i,
+                'pocet_rezervacii' => 0,
+                'prijem' => 0,
+                'potvrdene' => 0,
+                'cakajuce' => 0,
+                'zrusene' => 0,
+                'dokoncene' => 0
+            ];
+        }
+
+        foreach ($results as $row) {
+            $stats[(int)$row['mesiac']] = [
+                'mesiac' => (int)$row['mesiac'],
+                'pocet_rezervacii' => (int)$row['pocet_rezervacii'],
+                'prijem' => (float)$row['prijem'],
+                'potvrdene' => (int)$row['potvrdene'],
+                'cakajuce' => (int)$row['cakajuce'],
+                'zrusene' => (int)$row['zrusene'],
+                'dokoncene' => (int)$row['dokoncene']
+            ];
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Získať obsadenosť pre ubytovania v danom mesiaci
+     * @param array $accommodationIds Pole ID ubytovaní
+     * @param int $year Rok
+     * @param int $month Mesiac
+     * @return float Percentuálna obsadenosť
+     */
+    public static function getOccupancyForMonth(array $accommodationIds, int $year, int $month): float
+    {
+        if (empty($accommodationIds)) {
+            return 0.0;
+        }
+
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $totalPossibleDays = $daysInMonth * count($accommodationIds);
+
+        $firstDay = sprintf('%04d-%02d-01', $year, $month);
+        $lastDay = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth);
+
+        $placeholders = implode(',', array_fill(0, count($accommodationIds), '?'));
+        $params = array_merge($accommodationIds, [$lastDay, $firstDay]);
+
+        $sql = "SELECT
+                    SUM(
+                        DATEDIFF(
+                            LEAST(datum_do, '$lastDay'),
+                            GREATEST(datum_od, '$firstDay')
+                        )
+                    ) as obsadene_dni
+                FROM reservation
+                WHERE accommodation_id IN ($placeholders)
+                AND stav IN ('potvrdena', 'dokoncena')
+                AND datum_od <= ?
+                AND datum_do >= ?";
+
+        $stmt = Connection::getInstance()->prepare($sql);
+        $stmt->execute($params);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        $occupiedDays = (int)($result['obsadene_dni'] ?? 0);
+
+        if ($totalPossibleDays <= 0) {
+            return 0.0;
+        }
+
+        return min(100, round(($occupiedDays / $totalPossibleDays) * 100, 1));
+    }
+
+    /**
+     * Získať obsadené dátumy pre ubytovanie (pre kalendár)
+     * @param int $accommodationId ID ubytovania
+     * @param int $year Rok
+     * @param int $month Mesiac
+     * @return array Pole obsadených dátumov
+     */
+    public static function getBookedDates(int $accommodationId, int $year, int $month): array
+    {
+        $firstDay = sprintf('%04d-%02d-01', $year, $month);
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $lastDay = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth);
+
+        $sql = "SELECT datum_od, datum_do, stav
+                FROM reservation
+                WHERE accommodation_id = ?
+                AND stav IN ('cakajuca', 'potvrdena')
+                AND datum_od <= ?
+                AND datum_do >= ?";
+
+        $stmt = Connection::getInstance()->prepare($sql);
+        $stmt->execute([$accommodationId, $lastDay, $firstDay]);
+        $reservations = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $bookedDates = [];
+
+        foreach ($reservations as $res) {
+            $start = new DateTime(max($res['datum_od'], $firstDay));
+            $end = new DateTime(min($res['datum_do'], $lastDay));
+
+            while ($start <= $end) {
+                $dateStr = $start->format('Y-m-d');
+                $bookedDates[$dateStr] = $res['stav'];
+                $start->modify('+1 day');
+            }
+        }
+
+        return $bookedDates;
+    }
+
+    /**
+     * Získať štatistiky pre konkrétne ubytovanie
+     * @param int $accommodationId ID ubytovania
+     * @return array Štatistiky
+     */
+    public static function getAccommodationStats(int $accommodationId): array
+    {
+        $sql = "SELECT
+                    COUNT(*) as celkom,
+                    SUM(CASE WHEN stav = 'potvrdena' THEN 1 ELSE 0 END) as potvrdene,
+                    SUM(CASE WHEN stav = 'cakajuca' THEN 1 ELSE 0 END) as cakajuce,
+                    SUM(CASE WHEN stav = 'dokoncena' THEN 1 ELSE 0 END) as dokoncene,
+                    SUM(CASE WHEN stav = 'zrusena' THEN 1 ELSE 0 END) as zrusene,
+                    SUM(CASE WHEN stav IN ('potvrdena', 'dokoncena') THEN celkova_cena ELSE 0 END) as celkovy_prijem,
+                    AVG(CASE WHEN stav IN ('potvrdena', 'dokoncena') THEN DATEDIFF(datum_do, datum_od) END) as priemerna_dlzka
+                FROM reservation
+                WHERE accommodation_id = ?";
+
+        $stmt = Connection::getInstance()->prepare($sql);
+        $stmt->execute([$accommodationId]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return [
+            'celkom' => (int)($result['celkom'] ?? 0),
+            'potvrdene' => (int)($result['potvrdene'] ?? 0),
+            'cakajuce' => (int)($result['cakajuce'] ?? 0),
+            'dokoncene' => (int)($result['dokoncene'] ?? 0),
+            'zrusene' => (int)($result['zrusene'] ?? 0),
+            'celkovy_prijem' => (float)($result['celkovy_prijem'] ?? 0),
+            'priemerna_dlzka' => round((float)($result['priemerna_dlzka'] ?? 0), 1)
+        ];
+    }
 }

@@ -14,6 +14,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Vlastné CSS štýly -->
     <link href="<?= $link->asset('css/style.css') ?>" rel="stylesheet">
 </head>
@@ -65,6 +67,7 @@
                                 <li><a class="dropdown-item" href="<?= $link->url('reservation.index') ?>"><i class="bi bi-calendar-check"></i> Moje rezervácie</a></li>
                                 <?php if ($currentUser->isUbytovatel()): ?>
                                     <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="<?= $link->url('accommodation.myList') ?>"><i class="bi bi-house"></i> Moje ubytovania</a></li>
                                     <li><a class="dropdown-item" href="<?= $link->url('reservation.manage') ?>"><i class="bi bi-calendar-week"></i> Správa rezervácií</a></li>
                                     <li><a class="dropdown-item" href="<?= $link->url('accommodation.create') ?>"><i class="bi bi-plus-circle"></i> Pridať ubytovanie</a></li>
                                 <?php endif; ?>

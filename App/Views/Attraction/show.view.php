@@ -69,14 +69,17 @@
             </div>
 
             <!-- Tlačidlá pre admin -->
-            <?php if (isset($user) && $user?->isLoggedIn()): ?>
+            <?php
+            $isAdmin = isset($user) && $user->isLoggedIn() && \App\Models\User::getOne($user->getId())?->isAdmin();
+            ?>
+            <?php if ($isAdmin): ?>
                 <div class="mb-3">
-                    <a href="<?= $link->url('attraction.edit', ['id' => $attraction->id]) ?>" 
+                    <a href="<?= $link->url('attraction.edit', ['id' => $attraction->id]) ?>"
                        class="btn btn-warning">
                         <i class="bi bi-pencil"></i> Upraviť
                     </a>
-                    <form method="POST" action="<?= $link->url('attraction.delete', ['id' => $attraction->id]) ?>" 
-                          style="display: inline;" 
+                    <form method="POST" action="<?= $link->url('attraction.delete', ['id' => $attraction->id]) ?>"
+                          style="display: inline;"
                           onsubmit="return confirm('Naozaj chcete vymazať túto atrakciu?');">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Vymazať

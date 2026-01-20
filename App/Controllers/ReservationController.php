@@ -176,6 +176,7 @@ class ReservationController extends BaseController
 
         // Získať všetky ubytovania tohto používateľa
         $accommodations = Accommodation::getAll("user_id = ?", [$userId]);
+        $accommodationIds = array_map(fn($a) => $a->id, $accommodations);
 
         // Získať rezervácie pre tieto ubytovania
         $reservations = [];
@@ -191,8 +192,26 @@ class ReservationController extends BaseController
             return strtotime($b->datum_od) - strtotime($a->datum_od);
         });
 
+        // Štatistiky pre grafy
+        $currentYear = (int)date('Y');
+        $currentMonth = (int)date('m');
+        $monthlyStats = Reservation::getMonthlyStats($accommodationIds, $currentYear);
+        $occupancy = Reservation::getOccupancyForMonth($accommodationIds, $currentYear, $currentMonth);
+
+        // Štatistiky pre každé ubytovanie
+        $accommodationStats = [];
+        foreach ($accommodations as $acc) {
+            $accommodationStats[$acc->id] = Reservation::getAccommodationStats($acc->id);
+            $accommodationStats[$acc->id]['nazov'] = $acc->nazov;
+        }
+
         return $this->html([
-            'reservations' => $reservations
+            'reservations' => $reservations,
+            'accommodations' => $accommodations,
+            'monthlyStats' => $monthlyStats,
+            'occupancy' => $occupancy,
+            'accommodationStats' => $accommodationStats,
+            'currentYear' => $currentYear
         ]);
     }
 
@@ -260,6 +279,76 @@ class ReservationController extends BaseController
         } catch (\Exception $e) {
             return $this->redirect($this->url('reservation.manage', ['error' => 'failed']));
         }
+    }
+
+    /**
+     * Export rezervácií do CSV
+     */
+    public function exportCsv(Request $request): Response
+    {
+        $userId = $this->app->getAuthenticator()->getUser()->getId();
+        $user = User::getOne($userId);
+
+        if (!$user->isUbytovatel()) {
+            return $this->redirect($this->url('home.index', ['error' => 'unauthorized']));
+        }
+
+        $accommodations = Accommodation::getAll("user_id = ?", [$userId]);
+
+        $reservations = [];
+        foreach ($accommodations as $accommodation) {
+            $accReservations = Reservation::getByAccommodation($accommodation->id);
+            foreach ($accReservations as $res) {
+                $reservations[] = $res;
+            }
+        }
+
+        usort($reservations, function($a, $b) {
+            return strtotime($b->datum_od) - strtotime($a->datum_od);
+        });
+
+        $filename = 'rezervacie_' . date('Y-m-d') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        fputcsv($output, [
+            'ID',
+            'Ubytovanie',
+            'Hosť',
+            'Email',
+            'Dátum od',
+            'Dátum do',
+            'Počet nocí',
+            'Počet osôb',
+            'Celková cena',
+            'Stav'
+        ], ';');
+
+        foreach ($reservations as $res) {
+            $accommodation = $res->getAccommodation();
+            $guest = $res->getUser();
+
+            fputcsv($output, [
+                $res->id,
+                $accommodation ? $accommodation->nazov : '-',
+                $guest ? $guest->getFullName() : '-',
+                $guest ? $guest->email : '-',
+                date('d.m.Y', strtotime($res->datum_od)),
+                date('d.m.Y', strtotime($res->datum_do)),
+                $res->getNightsCount(),
+                $res->pocet_osob,
+                number_format($res->celkova_cena, 2, ',', ''),
+                $res->getStatusLabel()
+            ], ';');
+        }
+
+        fclose($output);
+        exit;
     }
 
     /**
