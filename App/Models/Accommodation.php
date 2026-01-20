@@ -222,4 +222,46 @@ class Accommodation extends Model
         }
         return array_map('trim', explode(',', $this->vybavenie));
     }
+
+    /**
+     * Získať všetky obrázky z galérie
+     */
+    public function getImages(): array
+    {
+        return AccommodationImage::getByAccommodation($this->id);
+    }
+
+    /**
+     * Získať primárny obrázok z galérie alebo hlavný obrázok
+     */
+    public function getPrimaryImage(): ?string
+    {
+        $primary = AccommodationImage::getPrimary($this->id);
+        if ($primary) {
+            return $primary->image_path;
+        }
+        return $this->obrazok;
+    }
+
+    /**
+     * Získať všetky obrázky (hlavný + galéria)
+     */
+    public function getAllImages(): array
+    {
+        $images = [];
+
+        // Pridáme hlavný obrázok ak existuje
+        if ($this->obrazok) {
+            $images[] = $this->obrazok;
+        }
+
+        // Pridáme obrázky z galérie
+        foreach ($this->getImages() as $img) {
+            if ($img->image_path && !in_array($img->image_path, $images)) {
+                $images[] = $img->image_path;
+            }
+        }
+
+        return $images;
+    }
 }

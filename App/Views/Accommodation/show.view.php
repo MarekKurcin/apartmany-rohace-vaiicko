@@ -4,6 +4,11 @@
 /** @var array $reviews */
 /** @var float|null $averageRating */
 /** @var \Framework\Support\LinkGenerator $link */
+
+$allImages = $accommodation->getAllImages();
+if (empty($allImages)) {
+    $allImages = ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200'];
+}
 ?>
 
 <div class="container py-5">
@@ -19,18 +24,51 @@
         <!-- Hlavný obsah -->
         <div class="col-lg-8">
             <div class="card shadow-sm mb-4">
-                <?php if ($accommodation->obrazok): ?>
-                    <img src="<?= htmlspecialchars($accommodation->obrazok) ?>" 
-                         class="card-img-top" 
-                         style="height: 400px; object-fit: cover;" 
-                         alt="<?= htmlspecialchars($accommodation->nazov) ?>">
+                <!-- Galéria obrázkov -->
+                <?php if (count($allImages) > 1): ?>
+                    <div id="galleryCarousel" class="carousel slide" data-bs-ride="false">
+                        <div class="carousel-indicators">
+                            <?php foreach ($allImages as $index => $img): ?>
+                                <button type="button" data-bs-target="#galleryCarousel" data-bs-slide-to="<?= $index ?>"
+                                        <?= $index === 0 ? 'class="active" aria-current="true"' : '' ?>></button>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="carousel-inner">
+                            <?php foreach ($allImages as $index => $img): ?>
+                                <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+                                    <img src="<?= htmlspecialchars($img) ?>"
+                                         class="d-block w-100"
+                                         style="height: 400px; object-fit: cover; cursor: pointer;"
+                                         alt="<?= htmlspecialchars($accommodation->nazov) ?>"
+                                         onclick="openLightbox(<?= $index ?>)">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    </div>
+
+                    <!-- Miniatúry -->
+                    <div class="d-flex gap-2 p-2 bg-light overflow-auto">
+                        <?php foreach ($allImages as $index => $img): ?>
+                            <img src="<?= htmlspecialchars($img) ?>"
+                                 class="gallery-thumb"
+                                 style="width: 80px; height: 60px; object-fit: cover; cursor: pointer; border-radius: 4px; opacity: <?= $index === 0 ? '1' : '0.6' ?>;"
+                                 onclick="goToSlide(<?= $index ?>)"
+                                 data-index="<?= $index ?>">
+                        <?php endforeach; ?>
+                    </div>
                 <?php else: ?>
-                    <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200" 
-                         class="card-img-top" 
-                         style="height: 400px; object-fit: cover;" 
+                    <img src="<?= htmlspecialchars($allImages[0]) ?>"
+                         class="card-img-top"
+                         style="height: 400px; object-fit: cover;"
                          alt="<?= htmlspecialchars($accommodation->nazov) ?>">
                 <?php endif; ?>
-                
+
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <h1 class="card-title mb-0"><?= htmlspecialchars($accommodation->nazov) ?></h1>
@@ -432,7 +470,60 @@ document.addEventListener('DOMContentLoaded', function() {
     border: 2px solid #2d6a4f;
     font-weight: bold;
 }
+.gallery-thumb {
+    transition: opacity 0.2s;
+}
+.gallery-thumb:hover {
+    opacity: 1 !important;
+}
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+}
+.lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+}
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 50px;
+    cursor: pointer;
+    padding: 20px;
+}
+.lightbox-prev { left: 20px; }
+.lightbox-next { right: 20px; }
 </style>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <span class="lightbox-nav lightbox-prev" onclick="lightboxPrev()">&#10094;</span>
+    <img id="lightbox-img" src="">
+    <span class="lightbox-nav lightbox-next" onclick="lightboxNext()">&#10095;</span>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -544,5 +635,65 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     loadCalendar();
+});
+
+// Gallery & Lightbox functions
+const galleryImages = <?= json_encode($allImages) ?>;
+let currentLightboxIndex = 0;
+
+function goToSlide(index) {
+    const carousel = document.getElementById('galleryCarousel');
+    if (carousel) {
+        const bsCarousel = bootstrap.Carousel.getOrCreateInstance(carousel);
+        bsCarousel.to(index);
+    }
+    updateThumbnails(index);
+}
+
+function updateThumbnails(activeIndex) {
+    document.querySelectorAll('.gallery-thumb').forEach((thumb, i) => {
+        thumb.style.opacity = i === activeIndex ? '1' : '0.6';
+    });
+}
+
+// Listen for carousel slide events
+document.getElementById('galleryCarousel')?.addEventListener('slid.bs.carousel', function(e) {
+    updateThumbnails(e.to);
+});
+
+function openLightbox(index) {
+    currentLightboxIndex = index;
+    const lightbox = document.getElementById('lightbox');
+    const img = document.getElementById('lightbox-img');
+    img.src = galleryImages[index];
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function lightboxPrev() {
+    currentLightboxIndex = (currentLightboxIndex - 1 + galleryImages.length) % galleryImages.length;
+    document.getElementById('lightbox-img').src = galleryImages[currentLightboxIndex];
+}
+
+function lightboxNext() {
+    currentLightboxIndex = (currentLightboxIndex + 1) % galleryImages.length;
+    document.getElementById('lightbox-img').src = galleryImages[currentLightboxIndex];
+}
+
+// Close lightbox on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxPrev();
+    if (e.key === 'ArrowRight') lightboxNext();
+});
+
+// Close lightbox on background click
+document.getElementById('lightbox')?.addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
 });
 </script>

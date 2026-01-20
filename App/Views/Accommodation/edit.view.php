@@ -111,6 +111,40 @@
                             </div>
                         </div>
 
+                        <!-- Galéria obrázkov -->
+                        <div class="mb-3">
+                            <label class="form-label">Galéria obrázkov</label>
+                            <div id="galleryImages" class="row g-2 mb-3">
+                                <?php foreach ($accommodation->getImages() as $img): ?>
+                                    <div class="col-4 col-md-3 gallery-item" data-id="<?= $img->id ?>">
+                                        <div class="position-relative">
+                                            <img src="<?= htmlspecialchars($img->image_path) ?>"
+                                                 class="img-thumbnail w-100"
+                                                 style="height: 80px; object-fit: cover;">
+                                            <?php if ($img->is_primary): ?>
+                                                <span class="position-absolute top-0 start-0 badge bg-success m-1" style="font-size: 0.6rem;">Hlavný</span>
+                                            <?php endif; ?>
+                                            <div class="position-absolute bottom-0 end-0 m-1">
+                                                <?php if (!$img->is_primary): ?>
+                                                    <button type="button" class="btn btn-xs btn-success p-1" onclick="setPrimaryImage(<?= $img->id ?>)" title="Nastaviť ako hlavný">
+                                                        <i class="bi bi-star" style="font-size: 0.7rem;"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                <button type="button" class="btn btn-xs btn-danger p-1" onclick="deleteGalleryImage(<?= $img->id ?>)" title="Vymazať">
+                                                    <i class="bi bi-trash" style="font-size: 0.7rem;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <input type="file" class="form-control" id="gallery_images" name="gallery_images[]" multiple accept="image/jpeg,image/png,image/webp">
+                            <small class="text-muted">Môžete nahrať viac obrázkov naraz (max 10 celkovo). JPG, PNG, WebP do 5MB.</small>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="uploadGalleryImages()">
+                                <i class="bi bi-upload"></i> Nahrať do galérie
+                            </button>
+                        </div>
+
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="aktivne" name="aktivne" value="1"
@@ -136,3 +170,81 @@
         </div>
     </div>
 </div>
+
+<script>
+const accommodationId = <?= $accommodation->id ?>;
+
+function uploadGalleryImages() {
+    const input = document.getElementById('gallery_images');
+    if (!input.files.length) {
+        alert('Vyberte obrázky na nahratie');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('accommodation_id', accommodationId);
+    for (let file of input.files) {
+        formData.append('gallery_images[]', file);
+    }
+
+    fetch('?c=Accommodation&a=uploadGalleryImages', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Nahraných ' + data.uploaded + ' obrázkov');
+            location.reload();
+        } else {
+            alert('Chyba: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Nastala chyba pri nahrávaní');
+    });
+}
+
+function deleteGalleryImage(imageId) {
+    if (!confirm('Naozaj chcete vymazať tento obrázok?')) return;
+
+    fetch('?c=Accommodation&a=deleteGalleryImage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'image_id=' + imageId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector('.gallery-item[data-id="' + imageId + '"]').remove();
+        } else {
+            alert('Chyba: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Nastala chyba pri mazaní');
+    });
+}
+
+function setPrimaryImage(imageId) {
+    fetch('?c=Accommodation&a=setPrimaryImage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'image_id=' + imageId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Chyba: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Nastala chyba');
+    });
+}
+</script>

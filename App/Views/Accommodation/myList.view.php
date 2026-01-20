@@ -108,7 +108,7 @@ foreach ($accommodations as $item) {
 
                         <div class="card-body">
                             <h5 class="card-title mb-1">
-                                <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>" class="text-decoration-none text-dark">
+                                <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>" class="text-decoration-none">
                                     <?= htmlspecialchars($acc->nazov) ?>
                                 </a>
                             </h5>
@@ -138,7 +138,7 @@ foreach ($accommodations as $item) {
                             </div>
                         </div>
 
-                        <div class="card-footer bg-white border-top-0">
+                        <div class="card-footer border-top-0">
                             <div class="d-flex gap-2">
                                 <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>"
                                    class="btn btn-sm btn-outline-secondary flex-fill">

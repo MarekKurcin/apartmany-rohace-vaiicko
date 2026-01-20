@@ -7,6 +7,7 @@ use Framework\Http\Request;
 use Framework\Http\Responses\Response;
 use Framework\Http\Responses\JsonResponse;
 use App\Models\Accommodation;
+use App\Models\AccommodationImage;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\Reservation;
@@ -19,7 +20,7 @@ class AccommodationController extends BaseController
     public function authorize(Request $request, string $action): bool
     {
         // Verejné akcie (vrátane AJAX filtrovania a kalendára)
-        if (in_array($action, ['index', 'show', 'filterAjax', 'getAvailability'])) {
+        if (in_array($action, ['index', 'show', 'filterAjax', 'getAvailability', 'getGalleryImages'])) {
             return true;
         }
 
@@ -388,7 +389,7 @@ class AccommodationController extends BaseController
                 'adresa' => $acc->adresa,
                 'kapacita' => $acc->kapacita,
                 'cena_za_noc' => number_format($acc->cena_za_noc, 2),
-                'obrazok' => $acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
+                'obrazok' => $acc->getPrimaryImage() ?? $acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
                 'vybavenie' => $acc->getVybavenieArray()
             ];
         }
@@ -606,5 +607,169 @@ class AccommodationController extends BaseController
         return $this->html([
             'accommodations' => $accommodationsWithStats
         ]);
+    }
+
+    /**
+     * AJAX - Získať obrázky galérie
+     */
+    public function getGalleryImages(Request $request): JsonResponse
+    {
+        $accommodationId = (int)$request->value('id');
+        $accommodation = Accommodation::getOne($accommodationId);
+
+        if (!$accommodation) {
+            return new JsonResponse(['success' => false, 'error' => 'Ubytovanie neexistuje']);
+        }
+
+        $images = $accommodation->getAllImages();
+
+        return new JsonResponse([
+            'success' => true,
+            'images' => $images
+        ]);
+    }
+
+    /**
+     * AJAX - Upload obrázkov do galérie
+     */
+    public function uploadGalleryImages(Request $request): JsonResponse
+    {
+        if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
+            return new JsonResponse(['success' => false, 'error' => 'Nie ste prihlásený']);
+        }
+
+        $accommodationId = (int)$request->value('accommodation_id');
+        $accommodation = Accommodation::getOne($accommodationId);
+
+        if (!$accommodation) {
+            return new JsonResponse(['success' => false, 'error' => 'Ubytovanie neexistuje']);
+        }
+
+        // Kontrola oprávnenia
+        $userId = $this->app->getAuthenticator()->getUser()->getId();
+        $user = User::getOne($userId);
+        if ($accommodation->user_id != $userId && !$user->isAdmin()) {
+            return new JsonResponse(['success' => false, 'error' => 'Nemáte oprávnenie']);
+        }
+
+        if (!isset($_FILES['gallery_images']) || empty($_FILES['gallery_images']['name'][0])) {
+            return new JsonResponse(['success' => false, 'error' => 'Žiadne súbory na nahratie']);
+        }
+
+        $uploadedImages = [];
+        $files = $_FILES['gallery_images'];
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $maxSize = 5 * 1024 * 1024;
+
+        $uploadDir = __DIR__ . '/../../public/uploads/gallery/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $currentCount = AccommodationImage::countByAccommodation($accommodationId);
+
+        for ($i = 0; $i < count($files['name']); $i++) {
+            if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
+            if ($currentCount + count($uploadedImages) >= 10) break; // Max 10 obrázkov
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($files['tmp_name'][$i]);
+
+            if (!in_array($mimeType, $allowedTypes)) continue;
+            if ($files['size'][$i] > $maxSize) continue;
+
+            $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+            $extension = $extensions[$mimeType];
+            $newFilename = 'gallery_' . $accommodationId . '_' . uniqid() . '.' . $extension;
+            $destination = $uploadDir . $newFilename;
+
+            if (move_uploaded_file($files['tmp_name'][$i], $destination)) {
+                $image = new AccommodationImage();
+                $image->accommodation_id = $accommodationId;
+                $image->image_path = '/uploads/gallery/' . $newFilename;
+                $image->is_primary = ($currentCount + count($uploadedImages) === 0);
+                $image->sort_order = $currentCount + count($uploadedImages);
+                $image->save();
+
+                $uploadedImages[] = [
+                    'id' => $image->id,
+                    'path' => $image->image_path,
+                    'is_primary' => $image->is_primary
+                ];
+            }
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'uploaded' => count($uploadedImages),
+            'images' => $uploadedImages
+        ]);
+    }
+
+    /**
+     * AJAX - Vymazať obrázok z galérie
+     */
+    public function deleteGalleryImage(Request $request): JsonResponse
+    {
+        if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
+            return new JsonResponse(['success' => false, 'error' => 'Nie ste prihlásený']);
+        }
+
+        $imageId = (int)$request->value('image_id');
+        $image = AccommodationImage::getOne($imageId);
+
+        if (!$image) {
+            return new JsonResponse(['success' => false, 'error' => 'Obrázok neexistuje']);
+        }
+
+        $accommodation = Accommodation::getOne($image->accommodation_id);
+        $userId = $this->app->getAuthenticator()->getUser()->getId();
+        $user = User::getOne($userId);
+
+        if ($accommodation->user_id != $userId && !$user->isAdmin()) {
+            return new JsonResponse(['success' => false, 'error' => 'Nemáte oprávnenie']);
+        }
+
+        $wasPrimary = $image->is_primary;
+        $image->deleteWithFile();
+
+        // Ak bol primárny, nastavíme prvý obrázok ako primárny
+        if ($wasPrimary) {
+            $images = AccommodationImage::getByAccommodation($accommodation->id);
+            if (!empty($images)) {
+                $images[0]->setPrimary();
+            }
+        }
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    /**
+     * AJAX - Nastaviť primárny obrázok
+     */
+    public function setPrimaryImage(Request $request): JsonResponse
+    {
+        if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
+            return new JsonResponse(['success' => false, 'error' => 'Nie ste prihlásený']);
+        }
+
+        $imageId = (int)$request->value('image_id');
+        $image = AccommodationImage::getOne($imageId);
+
+        if (!$image) {
+            return new JsonResponse(['success' => false, 'error' => 'Obrázok neexistuje']);
+        }
+
+        $accommodation = Accommodation::getOne($image->accommodation_id);
+        $userId = $this->app->getAuthenticator()->getUser()->getId();
+        $user = User::getOne($userId);
+
+        if ($accommodation->user_id != $userId && !$user->isAdmin()) {
+            return new JsonResponse(['success' => false, 'error' => 'Nemáte oprávnenie']);
+        }
+
+        $image->setPrimary();
+
+        return new JsonResponse(['success' => true]);
     }
 }

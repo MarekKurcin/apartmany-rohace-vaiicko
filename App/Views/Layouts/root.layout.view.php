@@ -53,8 +53,15 @@
                     <?php endif; } ?>
                 </ul>
                 
-                <ul class="navbar-nav">
-                    <?php if ($user->isLoggedIn()) { 
+                <ul class="navbar-nav align-items-center">
+                    <!-- Dark mode toggle -->
+                    <li class="nav-item me-2">
+                        <button type="button" class="theme-toggle" id="themeToggle" title="Prepnúť tému">
+                            <i class="bi bi-moon-fill" id="themeIcon"></i>
+                        </button>
+                    </li>
+
+                    <?php if ($user->isLoggedIn()) {
                         $currentUser = \App\Models\User::getOne($user->getId());
                     ?>
                         <li class="nav-item dropdown">
@@ -137,5 +144,35 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Vlastný JavaScript -->
     <script src="<?= $link->asset('js/app.js') ?>"></script>
+
+    <!-- Dark Mode Script -->
+    <script>
+    (function() {
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Load saved theme or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        // Toggle theme on button click
+        themeToggle?.addEventListener('click', function() {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+            }
+        }
+    })();
+    </script>
 </body>
 </html>

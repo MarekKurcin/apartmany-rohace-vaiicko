@@ -111,7 +111,10 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
                 <div class="col-md-6 col-lg-4">
                     <div class="card listing-card">
                         <div class="position-relative">
-                            <img src="<?= htmlspecialchars($acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800') ?>"
+                            <?php
+                            $displayImage = $acc->getPrimaryImage() ?? $acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800';
+                            ?>
+                            <img src="<?= htmlspecialchars($displayImage) ?>"
                                  class="card-img-top"
                                  alt="<?= htmlspecialchars($acc->nazov) ?>">
                             <span class="position-absolute top-0 end-0 m-2 badge badge-price">

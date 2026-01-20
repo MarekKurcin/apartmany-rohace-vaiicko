@@ -120,7 +120,8 @@
             <?php foreach ($featuredAccommodations as $acc): ?>
                 <div class="col-md-4 d-flex">
                     <div class="accommodation-card w-100">
-                        <div class="accommodation-image" style="background-image: url('<?= htmlspecialchars($acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800') ?>');">
+                        <?php $displayImage = $acc->getPrimaryImage() ?? $acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800'; ?>
+                        <div class="accommodation-image" style="background-image: url('<?= htmlspecialchars($displayImage) ?>');">
                             <span class="price-badge"><?= number_format($acc->cena_za_noc, 2) ?> €/noc</span>
                         </div>
                         <div class="accommodation-content p-3">
