@@ -178,9 +178,11 @@ class Attraction extends Model
                     $accommodation->$key = $value;
                 }
             }
+            // Explicitne nastavíme vzdialenosť
+            $accommodation->vzdialenost_km = $row['vzdialenost_km'];
             $accommodations[] = $accommodation;
         }
-        
+
         return $accommodations;
     }
 

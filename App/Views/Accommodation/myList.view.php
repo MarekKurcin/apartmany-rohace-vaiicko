@@ -162,9 +162,4 @@ foreach ($accommodations as $item) {
         </div>
     <?php endif; ?>
 
-    <div class="mt-4">
-        <a href="<?= $link->url('reservation.manage') ?>" class="btn btn-outline-primary">
-            <i class="bi bi-calendar-week"></i> Správa rezervácií
-        </a>
-    </div>
 </div>

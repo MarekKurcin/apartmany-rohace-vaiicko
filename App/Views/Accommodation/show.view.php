@@ -364,9 +364,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <small class="badge bg-info"><?= htmlspecialchars($attr->typ) ?></small>
                                         <?php endif; ?>
                                     </div>
-                                    <?php if (isset($attr->vzdialenost_km)): ?>
-                                        <small class="text-muted">
-                                            <i class="bi bi-signpost"></i> <?= number_format($attr->vzdialenost_km, 1) ?> km
+                                    <?php if ($attr->vzdialenost_km !== null): ?>
+                                        <small class="text-info">
+                                            <i class="bi bi-signpost-2"></i> <?= number_format($attr->vzdialenost_km, 1) ?> km od ubytovania
                                         </small>
                                     <?php endif; ?>
                                 </a>

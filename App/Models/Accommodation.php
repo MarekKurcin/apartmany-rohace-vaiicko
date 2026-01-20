@@ -21,6 +21,9 @@ class Accommodation extends Model
     protected ?string $obrazok = null;
     protected ?bool $aktivne = true;
 
+    // Dynamická property pre vzdialenosť od atrakcie (nie je v DB)
+    public ?float $vzdialenost_km = null;
+
     /**
      * Magic getter pre prístup k protected atribútom
      */
@@ -228,7 +231,12 @@ class Accommodation extends Model
      */
     public function getImages(): array
     {
-        return AccommodationImage::getByAccommodation($this->id);
+        try {
+            return AccommodationImage::getByAccommodation($this->id);
+        } catch (\Exception $e) {
+            // Ak tabuľka neexistuje alebo iná chyba, vrátime prázdne pole
+            return [];
+        }
     }
 
     /**
@@ -236,9 +244,13 @@ class Accommodation extends Model
      */
     public function getPrimaryImage(): ?string
     {
-        $primary = AccommodationImage::getPrimary($this->id);
-        if ($primary) {
-            return $primary->image_path;
+        try {
+            $primary = AccommodationImage::getPrimary($this->id);
+            if ($primary) {
+                return $primary->image_path;
+            }
+        } catch (\Exception $e) {
+            // Ignorujeme chybu a vraciame fallback
         }
         return $this->obrazok;
     }
@@ -256,10 +268,14 @@ class Accommodation extends Model
         }
 
         // Pridáme obrázky z galérie
-        foreach ($this->getImages() as $img) {
-            if ($img->image_path && !in_array($img->image_path, $images)) {
-                $images[] = $img->image_path;
+        try {
+            foreach ($this->getImages() as $img) {
+                if ($img->image_path && !in_array($img->image_path, $images)) {
+                    $images[] = $img->image_path;
+                }
             }
+        } catch (\Exception $e) {
+            // Ignorujeme chybu galérie
         }
 
         return $images;

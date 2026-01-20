@@ -108,10 +108,10 @@
                                     <small class="text-muted">
                                         <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($acc->adresa) ?>
                                     </small>
-                                    <?php if (isset($acc->vzdialenost_km)): ?>
+                                    <?php if ($acc->vzdialenost_km !== null): ?>
                                         <br>
                                         <small class="text-info">
-                                            <i class="bi bi-signpost"></i> <?= number_format($acc->vzdialenost_km, 1) ?> km
+                                            <i class="bi bi-signpost-2"></i> <?= number_format($acc->vzdialenost_km, 1) ?> km od atrakcie
                                         </small>
                                     <?php endif; ?>
                                 </a>

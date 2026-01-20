@@ -66,14 +66,6 @@
                         </p>
                     </div>
 
-                    <hr class="my-4">
-                    
-                    <div class="alert alert-info small">
-                        <strong>Testovacie účty:</strong><br>
-                        Admin: admin@apartmany.sk / password<br>
-                        Ubytovateľ: ubytovatel@test.sk / password<br>
-                        Turista: turista@test.sk / password
-                    </div>
                 </div>
             </div>
         </div>
