@@ -8,16 +8,16 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="mb-0"><i class="bi bi-geo-alt"></i> Atrakcie v okolí</h1>
-        <span class="badge bg-info fs-6" id="resultBadge">
+        <span class="badge badge-count fs-6" id="resultBadge">
             <i class="bi bi-pin-map"></i> <span id="resultCount"><?= count($attractions) ?></span>
             <?= count($attractions) == 1 ? 'atrakcia' : (count($attractions) >= 2 && count($attractions) <= 4 ? 'atrakcie' : 'atrakcií') ?>
         </span>
     </div>
 
     <!-- AJAX Filtračný formulár -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtrovanie atrakcií</h5>
+    <div class="card mb-4 filter-panel">
+        <div class="card-header">
+            <h5><i class="bi bi-funnel"></i> Filtrovanie</h5>
         </div>
         <div class="card-body">
             <form id="attractionFilterForm" action="<?= $link->url('attraction.index') ?>" method="GET">
@@ -55,7 +55,7 @@
                     <div class="col-md-3">
                         <label class="form-label">&nbsp;</label>
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-info flex-grow-1 text-white">
+                            <button type="submit" class="btn btn-filter flex-grow-1">
                                 <i class="bi bi-search"></i> Filtrovať
                             </button>
                             <button type="button" class="btn btn-outline-secondary" onclick="clearAttractionFilters()" title="Zrušiť filtre">
@@ -87,14 +87,13 @@
         <?php if (!empty($attractions)): ?>
             <?php foreach ($attractions as $attraction): ?>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card listing-card">
                         <div class="position-relative">
                             <img src="<?= htmlspecialchars($attraction->obrazok ?? 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800') ?>"
                                  class="card-img-top"
-                                 style="height: 200px; object-fit: cover;"
                                  alt="<?= htmlspecialchars($attraction->nazov) ?>">
                             <?php if ($attraction->typ): ?>
-                                <span class="position-absolute top-0 end-0 m-2 badge bg-info">
+                                <span class="position-absolute top-0 end-0 m-2 badge badge-type">
                                     <?= htmlspecialchars($attraction->typ) ?>
                                 </span>
                             <?php endif; ?>
@@ -103,16 +102,16 @@
                             <h5 class="card-title"><?= htmlspecialchars($attraction->nazov) ?></h5>
 
                             <?php if ($attraction->poloha): ?>
-                                <p class="text-muted mb-2">
+                                <p class="info-line">
                                     <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($attraction->poloha) ?>
                                 </p>
                             <?php endif; ?>
 
                             <?php if ($attraction->cena !== null): ?>
-                                <p class="text-muted mb-2">
+                                <p class="info-line">
                                     <i class="bi bi-tag"></i>
                                     <?php if ($attraction->cena == 0): ?>
-                                        <strong class="text-success">Zadarmo</strong>
+                                        <span class="text-success fw-semibold">Zadarmo</span>
                                     <?php else: ?>
                                         <?= $attraction->getFormattedPrice() ?>
                                     <?php endif; ?>
@@ -120,14 +119,14 @@
                             <?php endif; ?>
 
                             <?php if ($attraction->popis): ?>
-                                <p class="card-text small">
-                                    <?= htmlspecialchars(substr($attraction->popis, 0, 120)) ?><?= strlen($attraction->popis) > 120 ? '...' : '' ?>
+                                <p class="card-text">
+                                    <?= htmlspecialchars(substr($attraction->popis, 0, 100)) ?><?= strlen($attraction->popis) > 100 ? '...' : '' ?>
                                 </p>
                             <?php endif; ?>
                         </div>
-                        <div class="card-footer bg-transparent">
+                        <div class="card-footer">
                             <a href="<?= $link->url('attraction.show', ['id' => $attraction->id]) ?>"
-                               class="btn btn-outline-info w-100">
+                               class="btn btn-card w-100">
                                 <i class="bi bi-eye"></i> Zobraziť detail
                             </a>
                         </div>
@@ -147,13 +146,3 @@
     </div>
 </div>
 
-<style>
-.card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
-}
-</style>

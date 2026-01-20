@@ -115,8 +115,7 @@
 }
 
 .accommodation-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 .accommodation-image {
@@ -181,8 +180,7 @@
 }
 
 .attraction-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 .attraction-image {
@@ -246,8 +244,7 @@
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 .feature-icon {
@@ -524,12 +521,11 @@ body {
 .fade-in-delay-5 { animation-delay: 0.5s; }
 .fade-in-delay-6 { animation-delay: 0.6s; }
 
-/* Karty s fade-in */
+/* Karty bez animacie */
 .accommodation-card,
 .attraction-card,
 .feature-card {
-    opacity: 0;
-    animation: fadeInUp 0.5s ease forwards;
+    opacity: 1;
 }
 
 /* Hero content animacia */
@@ -565,10 +561,9 @@ body {
     animation: fadeInScale 0.6s ease 0.2s forwards;
 }
 
-/* Filter card animacia */
+/* Filter card - staticky bez animacie */
 .filter-card {
-    opacity: 0;
-    animation: fadeInLeft 0.5s ease forwards;
+    opacity: 1;
 }
 
 /* 17. Alert štýly */
@@ -689,4 +684,203 @@ body {
 .alert.fade-out {
     opacity: 0;
     transition: opacity 0.5s ease;
+}
+
+/* 25. Vlastne farby pre konzistentny dizajn */
+.badge-count {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.badge-price {
+    background-color: var(--gold-color);
+    color: white;
+}
+
+.badge-type {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.badge-feature {
+    background-color: var(--mint-color);
+    color: var(--dark-color);
+}
+
+.btn-filter {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-filter:hover {
+    background-color: var(--dark-color);
+    border-color: var(--dark-color);
+    color: white;
+}
+
+.btn-card {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: transparent;
+}
+
+.btn-card:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* 26. Zjednotene karty */
+.listing-card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: var(--white);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s ease;
+}
+
+.listing-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.listing-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.listing-card .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-card .card-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.listing-card .card-text {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    flex-grow: 1;
+}
+
+.listing-card .card-footer {
+    background: transparent;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 0.75rem 1rem;
+}
+
+.listing-card .info-line {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+/* 27. Filter panel - staticke, citatelne */
+.filter-panel {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.filter-panel .card-header {
+    background: var(--light-color);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 0.75rem 1rem;
+}
+
+.filter-panel .card-header h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin: 0;
+}
+
+/* 28. Prepisanie Bootstrap modrych farieb */
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-info {
+    background-color: var(--accent-color) !important;
+}
+
+.btn-primary {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background: var(--dark-color) !important;
+    border-color: var(--dark-color) !important;
+    color: white !important;
+}
+
+.btn-info {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+.btn-info:hover,
+.btn-info:focus,
+.btn-info:active {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.btn-outline-info {
+    color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-info:hover,
+.btn-outline-info:focus,
+.btn-outline-info:active {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+.card-header.bg-primary,
+.card-header.bg-info {
+    background: var(--primary-color) !important;
+}
+
+.card.bg-primary,
+.card.bg-info {
+    background: var(--primary-color) !important;
+}
+
+.badge.bg-primary,
+.badge.bg-info {
+    background-color: var(--accent-color) !important;
 }

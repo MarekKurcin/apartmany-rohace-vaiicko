@@ -10,16 +10,16 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="mb-0"><i class="bi bi-houses"></i> Ubytovanie pod Roháčmi</h1>
-        <span class="badge bg-primary fs-6" id="resultBadge">
+        <span class="badge badge-count fs-6" id="resultBadge">
             <i class="bi bi-building"></i> <span id="resultCount"><?= count($accommodations) ?></span>
             <?= count($accommodations) == 1 ? 'ubytovanie' : (count($accommodations) < 5 ? 'ubytovania' : 'ubytovaní') ?>
         </span>
     </div>
 
     <!-- AJAX Filtračný formulár -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtrovanie ubytovaní</h5>
+    <div class="card mb-4 filter-panel">
+        <div class="card-header">
+            <h5><i class="bi bi-funnel"></i> Filtrovanie</h5>
         </div>
         <div class="card-body">
             <form id="accommodationFilterForm" action="<?= $link->url('accommodation.index') ?>" method="GET">
@@ -63,7 +63,7 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
                     <div class="col-md-3">
                         <label class="form-label">&nbsp;</label>
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary flex-grow-1">
+                            <button type="submit" class="btn btn-filter flex-grow-1">
                                 <i class="bi bi-search"></i> Filtrovať
                             </button>
                             <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()" title="Zrušiť filtre">
@@ -109,48 +109,47 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
         <?php if (!empty($accommodations)): ?>
             <?php foreach ($accommodations as $acc): ?>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card listing-card">
                         <div class="position-relative">
-                            <img src="<?= htmlspecialchars($acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800') ?>" 
-                                 class="card-img-top" 
-                                 style="height: 200px; object-fit: cover;" 
+                            <img src="<?= htmlspecialchars($acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800') ?>"
+                                 class="card-img-top"
                                  alt="<?= htmlspecialchars($acc->nazov) ?>">
-                            <span class="position-absolute top-0 end-0 m-2 badge bg-primary fs-6">
+                            <span class="position-absolute top-0 end-0 m-2 badge badge-price">
                                 <?= number_format($acc->cena_za_noc, 2) ?> €/noc
                             </span>
                         </div>
                         <div class="card-body">
                             <h5 class="card-title"><?= htmlspecialchars($acc->nazov) ?></h5>
-                            <p class="text-muted mb-2">
+                            <p class="info-line">
                                 <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($acc->adresa) ?>
                             </p>
-                            <p class="text-muted mb-2">
+                            <p class="info-line">
                                 <i class="bi bi-people"></i> Kapacita: <?= $acc->kapacita ?> osôb
                             </p>
-                            
+
                             <?php if ($acc->popis): ?>
-                                <p class="card-text small">
+                                <p class="card-text">
                                     <?= htmlspecialchars(substr($acc->popis, 0, 100)) ?><?= strlen($acc->popis) > 100 ? '...' : '' ?>
                                 </p>
                             <?php endif; ?>
-                            
+
                             <?php if ($acc->vybavenie): ?>
-                                <div class="mb-3">
-                                    <?php 
+                                <div class="mb-2">
+                                    <?php
                                     $features = $acc->getVybavenieArray();
                                     foreach (array_slice($features, 0, 3) as $feature):
                                     ?>
-                                        <span class="badge bg-secondary me-1"><?= htmlspecialchars($feature) ?></span>
+                                        <span class="badge badge-feature me-1"><?= htmlspecialchars($feature) ?></span>
                                     <?php endforeach; ?>
                                     <?php if (count($features) > 3): ?>
-                                        <span class="badge bg-light text-dark">+<?= count($features) - 3 ?></span>
+                                        <span class="badge badge-feature">+<?= count($features) - 3 ?></span>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
-                        <div class="card-footer bg-transparent">
+                        <div class="card-footer">
                             <a href="<?= $link->url('accommodation.show', ['id' => $acc->id]) ?>"
-                               class="btn btn-outline-primary w-100">
+                               class="btn btn-card w-100">
                                 <i class="bi bi-eye"></i> Zobraziť detail
                             </a>
                         </div>
@@ -172,13 +171,3 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
     </div>
 </div>
 
-<style>
-.card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
-}
-</style>
