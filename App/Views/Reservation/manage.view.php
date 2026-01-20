@@ -50,36 +50,55 @@
     $cakajuce = 0;
     $potvrdene = 0;
     $celkovyPrijem = 0;
+    $obsadeneDni = 0;
+    $mesiac = date('Y-m');
+
     foreach ($reservations as $r) {
         if ($r->stav === 'cakajuca') $cakajuce++;
         if ($r->stav === 'potvrdena') $potvrdene++;
         if (in_array($r->stav, ['potvrdena', 'dokoncena'])) {
             $celkovyPrijem += $r->celkova_cena;
+            // Počet obsadených dní tento mesiac
+            $od = max(strtotime($r->datum_od), strtotime($mesiac . '-01'));
+            $do = min(strtotime($r->datum_do), strtotime($mesiac . '-' . date('t')));
+            if ($do > $od) {
+                $obsadeneDni += ($do - $od) / 86400;
+            }
         }
     }
+    $dniVMesiaci = date('t');
+    $obsadenost = $dniVMesiaci > 0 ? round(($obsadeneDni / $dniVMesiaci) * 100) : 0;
     ?>
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-warning text-dark">
-                <div class="card-body text-center">
-                    <h3><?= $cakajuce ?></h3>
-                    <p class="mb-0">Čakajúce na potvrdenie</p>
+    <div class="row mb-4 g-3">
+        <div class="col-6 col-lg-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body text-center py-3">
+                    <h3 class="mb-1"><?= $cakajuce ?></h3>
+                    <small>Čakajúce</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h3><?= $potvrdene ?></h3>
-                    <p class="mb-0">Potvrdené rezervácie</p>
+        <div class="col-6 col-lg-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center py-3">
+                    <h3 class="mb-1"><?= $potvrdene ?></h3>
+                    <small>Potvrdené</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <h3><?= number_format($celkovyPrijem, 0, ',', ' ') ?> &euro;</h3>
-                    <p class="mb-0">Celkový príjem</p>
+        <div class="col-6 col-lg-3">
+            <div class="card text-white h-100" style="background-color: var(--primary-color)">
+                <div class="card-body text-center py-3">
+                    <h3 class="mb-1"><?= $obsadenost ?>%</h3>
+                    <small>Obsadenosť (<?= date('F') ?>)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card text-white h-100" style="background-color: var(--gold-color)">
+                <div class="card-body text-center py-3">
+                    <h3 class="mb-1"><?= number_format($celkovyPrijem, 0, ',', ' ') ?>&euro;</h3>
+                    <small>Celkový príjem</small>
                 </div>
             </div>
         </div>
@@ -143,7 +162,7 @@
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <a href="<?= $link->url('reservation.show', ['id' => $reservation->id]) ?>"
-                                       class="btn btn-outline-primary" title="Detail">
+                                       class="btn btn-outline-secondary" title="Detail">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <?php if ($reservation->stav === 'cakajuca'): ?>

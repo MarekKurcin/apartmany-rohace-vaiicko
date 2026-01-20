@@ -736,7 +736,7 @@ body {
     border: none;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     background: var(--white);
     height: 100%;
     display: flex;
@@ -745,7 +745,7 @@ body {
 }
 
 .listing-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
 .listing-card .card-img-top {

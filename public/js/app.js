@@ -149,25 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
         lazyImages.forEach(img => imageObserver.observe(img));
     }
     
-    // 2.4 Animácie pri scrollovaní (fade in)
-    const animateOnScroll = document.querySelectorAll('.accommodation-card, .attraction-card, .feature-card');
-    
-    const scrollObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, { threshold: 0.1 });
-    
-    animateOnScroll.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        scrollObserver.observe(el);
-    });
-    
     // 2.5 Auto-hide alerts (only success/danger notifications, not static info/secondary boxes)
     const notificationAlerts = document.querySelectorAll('.alert-success, .alert-danger');
     notificationAlerts.forEach(alert => {
@@ -542,6 +523,7 @@ function initAjaxFilter() {
             let text = 'ubytovaní';
             if (count == 1) text = 'ubytovanie';
             else if (count >= 2 && count <= 4) text = 'ubytovania';
+            resultBadge.className = 'badge badge-count fs-6';
             resultBadge.innerHTML = `<i class="bi bi-building"></i> <span id="resultCount">${count}</span> ${text}`;
         }
 
@@ -562,40 +544,39 @@ function initAjaxFilter() {
         let html = '';
         accommodations.forEach(acc => {
             const vybavenieHtml = acc.vybavenie.slice(0, 3).map(v =>
-                `<span class="badge bg-secondary me-1">${escapeHtml(v)}</span>`
+                `<span class="badge badge-feature me-1">${escapeHtml(v)}</span>`
             ).join('');
             const extraCount = acc.vybavenie.length > 3 ?
-                `<span class="badge bg-light text-dark">+${acc.vybavenie.length - 3}</span>` : '';
+                `<span class="badge badge-feature">+${acc.vybavenie.length - 3}</span>` : '';
 
             html += `
-                <div class="col-md-6 col-lg-4 accommodation-item" data-aos="fade-up">
-                    <div class="card h-100 shadow-sm">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card listing-card">
                         <div class="position-relative">
                             <img src="${escapeHtml(acc.obrazok)}"
                                  class="card-img-top"
-                                 style="height: 200px; object-fit: cover;"
                                  alt="${escapeHtml(acc.nazov)}"
                                  loading="lazy">
-                            <span class="position-absolute top-0 end-0 m-2 badge bg-primary fs-6">
+                            <span class="position-absolute top-0 end-0 m-2 badge badge-price">
                                 ${acc.cena_za_noc} €/noc
                             </span>
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">${escapeHtml(acc.nazov)}</h5>
-                            <p class="text-muted mb-2">
+                            <p class="info-line">
                                 <i class="bi bi-geo-alt"></i> ${escapeHtml(acc.adresa)}
                             </p>
-                            <p class="text-muted mb-2">
+                            <p class="info-line">
                                 <i class="bi bi-people"></i> Kapacita: ${acc.kapacita} osob
                             </p>
-                            ${acc.popis ? `<p class="card-text small">${escapeHtml(acc.popis)}</p>` : ''}
-                            <div class="mb-3">
+                            ${acc.popis ? `<p class="card-text">${escapeHtml(acc.popis)}</p>` : ''}
+                            <div class="mb-2">
                                 ${vybavenieHtml}
                                 ${extraCount}
                             </div>
                         </div>
-                        <div class="card-footer bg-transparent">
-                            <a href="?c=Accommodation&a=show&id=${acc.id}" class="btn btn-outline-primary w-100">
+                        <div class="card-footer">
+                            <a href="?c=Accommodation&a=show&id=${acc.id}" class="btn btn-card w-100">
                                 <i class="bi bi-eye"></i> Zobrazit detail
                             </a>
                         </div>
@@ -605,17 +586,6 @@ function initAjaxFilter() {
         });
 
         accommodationGrid.innerHTML = html;
-
-        // Animacia novych kariet
-        accommodationGrid.querySelectorAll('.accommodation-item').forEach((item, index) => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                item.style.opacity = '1';
-                item.style.transform = 'translateY(0)';
-            }, index * 50);
-        });
     }
 
     function showFilterError(message) {
@@ -843,18 +813,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Staggered fade-in animacie pre karty
- * Karty sa zobrazia postupne s oneskorenim
+ * Staggered animacie - vypnute pre staticke karty
  */
 function initStaggeredAnimations() {
-    // Najdi vsetky karty
-    const cards = document.querySelectorAll('.accommodation-card, .attraction-card, .feature-card');
-
-    cards.forEach((card, index) => {
-        // Delay max 0.6s (6 kariet), potom sa opakuje
-        const delayClass = `fade-in-delay-${(index % 6) + 1}`;
-        card.classList.add(delayClass);
-    });
+    // Animacie vypnute - karty su staticke
 }
 
 /**
@@ -914,6 +876,7 @@ function initAttractionFilter() {
             let text = 'atrakcií';
             if (count == 1) text = 'atrakcia';
             else if (count >= 2 && count <= 4) text = 'atrakcie';
+            resultBadge.className = 'badge badge-count fs-6';
             resultBadge.innerHTML = `<i class="bi bi-pin-map"></i> <span id="resultCount">${count}</span> ${text}`;
         }
 
@@ -934,28 +897,27 @@ function initAttractionFilter() {
         let html = '';
         attractions.forEach(attr => {
             const cenaHtml = attr.is_free
-                ? '<strong class="text-success">Zadarmo</strong>'
+                ? '<span class="text-success fw-semibold">Zadarmo</span>'
                 : escapeHtml(attr.cena_formatted);
 
             html += `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card listing-card">
                         <div class="position-relative">
                             <img src="${escapeHtml(attr.obrazok)}"
                                  class="card-img-top"
-                                 style="height: 200px; object-fit: cover;"
                                  alt="${escapeHtml(attr.nazov)}"
                                  loading="lazy">
-                            ${attr.typ ? `<span class="position-absolute top-0 end-0 m-2 badge bg-info">${escapeHtml(attr.typ)}</span>` : ''}
+                            ${attr.typ ? `<span class="position-absolute top-0 end-0 m-2 badge badge-type">${escapeHtml(attr.typ)}</span>` : ''}
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">${escapeHtml(attr.nazov)}</h5>
-                            ${attr.poloha ? `<p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> ${escapeHtml(attr.poloha)}</p>` : ''}
-                            <p class="text-muted mb-2"><i class="bi bi-tag"></i> ${cenaHtml}</p>
-                            ${attr.popis ? `<p class="card-text small">${escapeHtml(attr.popis)}</p>` : ''}
+                            ${attr.poloha ? `<p class="info-line"><i class="bi bi-geo-alt"></i> ${escapeHtml(attr.poloha)}</p>` : ''}
+                            <p class="info-line"><i class="bi bi-tag"></i> ${cenaHtml}</p>
+                            ${attr.popis ? `<p class="card-text">${escapeHtml(attr.popis)}</p>` : ''}
                         </div>
-                        <div class="card-footer bg-transparent">
-                            <a href="index.php?c=Attraction&a=show&id=${attr.id}" class="btn btn-outline-info w-100">
+                        <div class="card-footer">
+                            <a href="index.php?c=Attraction&a=show&id=${attr.id}" class="btn btn-card w-100">
                                 <i class="bi bi-eye"></i> Zobraziť detail
                             </a>
                         </div>
