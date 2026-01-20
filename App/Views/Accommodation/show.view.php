@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             <!-- Kalendár dostupnosti -->
             <div class="card shadow-sm mt-4">
-                <div class="card-header bg-white">
+                <div class="card-header" style="background-color: var(--primary-color); color: white;">
                     <h5 class="mb-0"><i class="bi bi-calendar3"></i> Dostupnosť</h5>
                 </div>
                 <div class="card-body">
@@ -366,16 +366,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="prevMonth">
                             <i class="bi bi-chevron-left"></i>
                         </button>
-                        <span id="calendarTitle" class="fw-bold"></span>
+                        <span id="calendarTitle" class="fw-bold">Načítavam...</span>
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="nextMonth">
                             <i class="bi bi-chevron-right"></i>
                         </button>
                     </div>
-                    <div id="availabilityCalendar"></div>
-                    <div class="mt-3 small">
-                        <span class="me-3"><span class="badge bg-success">&nbsp;</span> Voľné</span>
-                        <span class="me-3"><span class="badge bg-danger">&nbsp;</span> Obsadené</span>
-                        <span><span class="badge bg-warning">&nbsp;</span> Čaká na potvrdenie</span>
+                    <div id="availabilityCalendar" class="mb-3">
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-hourglass-split"></i> Načítavam kalendár...
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 small">
+                        <span><span class="d-inline-block rounded" style="width: 12px; height: 12px; background: #e8f5e9;"></span> Voľné</span>
+                        <span><span class="d-inline-block rounded" style="width: 12px; height: 12px; background: #ffebee;"></span> Obsadené</span>
+                        <span><span class="d-inline-block rounded" style="width: 12px; height: 12px; background: #fff3e0;"></span> Čakajúce</span>
                     </div>
                 </div>
             </div>
@@ -447,16 +451,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!titleEl || !calendarEl) return;
 
         titleEl.textContent = monthNames[currentMonth - 1] + ' ' + currentYear;
+        calendarEl.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Načítavam...</div>';
 
-        fetch('?c=Accommodation&a=getAvailability&id=' + accommodationId + '&year=' + currentYear + '&month=' + currentMonth)
-            .then(response => response.json())
+        const url = window.location.pathname + '?c=Accommodation&a=getAvailability&id=' + accommodationId + '&year=' + currentYear + '&month=' + currentMonth;
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    renderCalendar(data.bookedDates);
+                    renderCalendar(data.bookedDates || {});
+                } else {
+                    calendarEl.innerHTML = '<div class="text-center text-danger py-3">Chyba pri načítaní</div>';
                 }
             })
             .catch(error => {
                 console.error('Error loading calendar:', error);
+                renderCalendar({});
             });
     }
 

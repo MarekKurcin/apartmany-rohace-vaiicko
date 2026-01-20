@@ -284,7 +284,7 @@ class Reservation extends Model
             return 0.0;
         }
 
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $daysInMonth = (int)date('t', mktime(0, 0, 0, $month, 1, $year));
         $totalPossibleDays = $daysInMonth * count($accommodationIds);
 
         $firstDay = sprintf('%04d-%02d-01', $year, $month);
@@ -329,7 +329,7 @@ class Reservation extends Model
     public static function getBookedDates(int $accommodationId, int $year, int $month): array
     {
         $firstDay = sprintf('%04d-%02d-01', $year, $month);
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $daysInMonth = (int)date('t', mktime(0, 0, 0, $month, 1, $year));
         $lastDay = sprintf('%04d-%02d-%02d', $year, $month, $daysInMonth);
 
         $sql = "SELECT datum_od, datum_do, stav
