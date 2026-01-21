@@ -485,23 +485,30 @@ function initAjaxFilter() {
         const params = new URLSearchParams();
 
         formData.forEach((value, key) => {
-            if (value) params.append(key, value);
+            // Preskocime 'c' parameter, pretoze je v URL hardcoded
+            if (value && key !== 'c') params.append(key, value);
         });
 
-        const url = `index.php?c=Accommodation&a=filterAjax&${params.toString()}`;
+        const url = `?c=Accommodation&a=filterAjax&${params.toString()}`;
 
         fetch(url, {
             method: 'GET',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 renderAccommodations(data.data, data.count);
             } else {
-                showFilterError('Nastala chyba pri načítavaní');
+                showFilterError(data.error || 'Nastala chyba pri načítavaní');
             }
         })
         .catch(error => {
@@ -692,10 +699,11 @@ function initAjaxReview() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Odosielam...';
 
-        fetch('index.php?c=Accommodation&a=storeReview', {
+        fetch('?c=Accommodation&a=storeReview', {
             method: 'POST',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
             },
             body: formData
         })
@@ -845,21 +853,30 @@ function initAttractionFilter() {
         const params = new URLSearchParams();
 
         formData.forEach((value, key) => {
-            if (value) params.append(key, value);
+            // Preskocime 'c' parameter, pretoze je v URL hardcoded
+            if (value && key !== 'c') params.append(key, value);
         });
 
-        const url = `index.php?c=Attraction&a=filterAjax&${params.toString()}`;
+        const url = `?c=Attraction&a=filterAjax&${params.toString()}`;
 
         fetch(url, {
             method: 'GET',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 renderAttractions(data.data, data.count);
+            } else {
+                console.error('Filter error:', data.error);
             }
         })
         .catch(error => {
@@ -917,7 +934,7 @@ function initAttractionFilter() {
                             ${attr.popis ? `<p class="card-text">${escapeHtml(attr.popis)}</p>` : ''}
                         </div>
                         <div class="card-footer">
-                            <a href="index.php?c=Attraction&a=show&id=${attr.id}" class="btn btn-card w-100">
+                            <a href="?c=Attraction&a=show&id=${attr.id}" class="btn btn-card w-100">
                                 <i class="bi bi-eye"></i> Zobraziť detail
                             </a>
                         </div>

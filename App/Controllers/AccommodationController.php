@@ -362,43 +362,63 @@ class AccommodationController extends BaseController
      */
     public function filterAjax(Request $request): JsonResponse
     {
-        // Spracovanie vybavenia z checkboxov
-        $vybavenieArr = $request->value('vybavenie_arr');
-        $vybavenie = '';
-        if (is_array($vybavenieArr) && !empty($vybavenieArr)) {
-            $vybavenie = implode(',', $vybavenieArr);
-        } elseif ($request->value('vybavenie')) {
-            $vybavenie = $request->value('vybavenie');
-        }
+        try {
+            // Spracovanie vybavenia z checkboxov
+            $vybavenieArr = $request->value('vybavenie_arr');
+            $vybavenie = '';
+            if (is_array($vybavenieArr) && !empty($vybavenieArr)) {
+                $vybavenie = implode(',', $vybavenieArr);
+            } elseif ($request->value('vybavenie')) {
+                $vybavenie = $request->value('vybavenie');
+            }
 
-        $filters = [
-            'kapacita' => $request->value('kapacita'),
-            'max_cena' => $request->value('max_cena'),
-            'vybavenie' => $vybavenie,
-            'zoradenie' => $request->value('zoradenie') ?: 'najnovsie'
-        ];
-
-        $accommodations = Accommodation::search($filters);
-
-        $result = [];
-        foreach ($accommodations as $acc) {
-            $result[] = [
-                'id' => $acc->id,
-                'nazov' => $acc->nazov,
-                'popis' => $acc->popis ? substr($acc->popis, 0, 100) . (strlen($acc->popis) > 100 ? '...' : '') : '',
-                'adresa' => $acc->adresa,
-                'kapacita' => $acc->kapacita,
-                'cena_za_noc' => number_format($acc->cena_za_noc, 2),
-                'obrazok' => $acc->getPrimaryImage() ?? $acc->obrazok ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
-                'vybavenie' => $acc->getVybavenieArray()
+            $filters = [
+                'kapacita' => $request->value('kapacita'),
+                'max_cena' => $request->value('max_cena'),
+                'vybavenie' => $vybavenie,
+                'zoradenie' => $request->value('zoradenie') ?: 'najnovsie'
             ];
-        }
 
-        return new JsonResponse([
-            'success' => true,
-            'count' => count($result),
-            'data' => $result
-        ]);
+            $accommodations = Accommodation::search($filters);
+
+            $result = [];
+            foreach ($accommodations as $acc) {
+                // Bezpecne ziskanie obrazka
+                $obrazok = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800';
+                try {
+                    $primary = $acc->getPrimaryImage();
+                    if ($primary) {
+                        $obrazok = $primary;
+                    } elseif ($acc->obrazok) {
+                        $obrazok = $acc->obrazok;
+                    }
+                } catch (\Exception $imgEx) {
+                    // Ignorujeme chybu obrazka
+                }
+
+                $result[] = [
+                    'id' => $acc->id,
+                    'nazov' => $acc->nazov,
+                    'popis' => $acc->popis ? mb_substr($acc->popis, 0, 100) . (mb_strlen($acc->popis) > 100 ? '...' : '') : '',
+                    'adresa' => $acc->adresa,
+                    'kapacita' => $acc->kapacita,
+                    'cena_za_noc' => number_format((float)$acc->cena_za_noc, 2),
+                    'obrazok' => $obrazok,
+                    'vybavenie' => $acc->getVybavenieArray()
+                ];
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'count' => count($result),
+                'data' => $result
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Nastala chyba pri načítavaní dát'
+            ]);
+        }
     }
 
     /**

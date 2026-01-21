@@ -13,7 +13,8 @@
         
         <!-- Vyhľadávací formulár -->
         <div class="search-box">
-            <form action="<?= $link->url('accommodation.index') ?>" method="GET" class="row g-3">
+            <form action="index.php" method="GET" class="row g-3">
+                <input type="hidden" name="c" value="Accommodation">
                 <div class="col-md-3">
                     <label class="form-label">Kapacita</label>
                     <select class="form-select" name="kapacita">
