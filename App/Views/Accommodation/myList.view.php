@@ -1,7 +1,4 @@
 <?php
-/** @var array $accommodations */
-/** @var \Framework\Support\LinkGenerator $link */
-
 $celkomPrijem = 0;
 $celkomCakajuce = 0;
 $celkomPotvrdene = 0;
@@ -34,7 +31,6 @@ foreach ($accommodations as $item) {
         </div>
     <?php endif; ?>
 
-    <!-- Súhrnné štatistiky -->
     <?php if (!empty($accommodations)): ?>
     <div class="row g-3 mb-4">
         <div class="col-md-4">

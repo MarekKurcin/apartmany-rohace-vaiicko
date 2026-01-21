@@ -1,8 +1,4 @@
 <?php
-/** @var \App\Models\Accommodation $accommodation */
-/** @var array|null $errors */
-/** @var array|null $old */
-/** @var \Framework\Support\LinkGenerator $link */
 ?>
 
 <div class="container py-5">

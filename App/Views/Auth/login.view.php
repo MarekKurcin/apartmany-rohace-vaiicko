@@ -1,7 +1,4 @@
 <?php
-/** @var \Framework\Support\LinkGenerator $link */
-/** @var array|null $errors */
-/** @var array|null $old */
 ?>
 
 <div class="container py-5">

@@ -1,10 +1,4 @@
 <?php
-/** @var \App\Models\Accommodation $accommodation */
-/** @var array $attractions */
-/** @var array $reviews */
-/** @var float|null $averageRating */
-/** @var \Framework\Support\LinkGenerator $link */
-
 $allImages = $accommodation->getAllImages();
 if (empty($allImages)) {
     $allImages = ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200'];
@@ -21,7 +15,6 @@ if (empty($allImages)) {
     </nav>
 
     <div class="row">
-        <!-- Hlavný obsah -->
         <div class="col-lg-8">
             <div class="card shadow-sm mb-4">
                 <!-- Galéria obrázkov -->
@@ -53,7 +46,7 @@ if (empty($allImages)) {
                     </div>
 
                     <!-- Miniatúry -->
-                    <div class="d-flex gap-2 p-2 bg-light overflow-auto">
+                    <div class="d-flex gap-2 p-2 bg-light">
                         <?php foreach ($allImages as $index => $img): ?>
                             <img src="<?= htmlspecialchars($img) ?>"
                                  class="gallery-thumb"
@@ -177,72 +170,6 @@ if (empty($allImages)) {
                             </form>
                         </div>
 
-<script>
-// Inline debug pre recenzie
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inline review script loaded');
-
-    const stars = document.querySelectorAll('.rating-star');
-    const ratingInput = document.getElementById('reviewRating');
-    const reviewForm = document.getElementById('reviewForm');
-
-    console.log('Stars found:', stars.length);
-    console.log('Rating input:', ratingInput);
-    console.log('Review form:', reviewForm);
-
-    // Hviezdicky click handler
-    stars.forEach(function(star) {
-        star.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            console.log('Star clicked:', value);
-            if (ratingInput) {
-                ratingInput.value = value;
-            }
-            // Update vizual
-            stars.forEach(function(s) {
-                const sVal = parseInt(s.getAttribute('data-value'));
-                s.classList.remove('bi-star', 'bi-star-fill');
-                s.classList.add(sVal <= value ? 'bi-star-fill' : 'bi-star');
-            });
-        });
-    });
-
-    // Form submit handler
-    if (reviewForm) {
-        reviewForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('Form submitted');
-            console.log('Rating value:', ratingInput ? ratingInput.value : 'no input');
-
-            if (!ratingInput || !ratingInput.value || ratingInput.value < 1) {
-                alert('Vyberte prosím hodnotenie (1-5 hviezdičiek)');
-                return;
-            }
-
-            const formData = new FormData(reviewForm);
-
-            fetch('?c=Accommodation&a=storeReview', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Response:', data);
-                if (data.success) {
-                    alert('Recenzia bola pridaná!');
-                    location.reload();
-                } else {
-                    alert('Chyba: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Nastala chyba pri odosielaní');
-            });
-        });
-    }
-});
-</script>
                     <?php elseif ($canReview && $hasReviewed): ?>
                         <div class="alert alert-info mb-4">
                             <i class="bi bi-info-circle"></i> Toto ubytovanie ste už hodnotili.
@@ -323,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Tlačidlá pre vlastníka/admina -->
             <?php
             $canEdit = false;
-            if (isset($user) && $user->isLoggedIn()) {
+            if ($user->isLoggedIn()) {
                 $currentUser = \App\Models\User::getOne($user->getId());
                 $canEdit = $currentUser && ($currentUser->isAdmin() || $accommodation->user_id == $user->getId());
             }
@@ -351,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <?php if (!empty($attractions)): ?>
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="bi bi-map"></i> Atrakcie v okolí</h5>
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Atrakcie v okolí</h5>
                     </div>
                     <div class="card-body">
                         <div class="list-group">
@@ -381,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Rezervácia</h5>
                 </div>
-                <div class="card-body text-center">
+                <div class="card-body">
                     <p class="h3 text-primary mb-2"><?= number_format($accommodation->cena_za_noc, 2, ',', ' ') ?> &euro;</p>
                     <p class="text-muted mb-3">za noc</p>
                     <p class="mb-1"><i class="bi bi-people"></i> Kapacita: <?= $accommodation->kapacita ?> osôb</p>
@@ -397,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Kalendár dostupnosti -->
             <div class="card shadow-sm mt-4">
                 <div class="card-header" style="background-color: var(--primary-color); color: white;">
-                    <h5 class="mb-0"><i class="bi bi-calendar3"></i> Dostupnosť</h5>
+                    <h5 class="mb-0"><i class="bi bi-calendar"></i> Dostupnosť</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">

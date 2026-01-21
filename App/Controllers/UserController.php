@@ -9,22 +9,16 @@ use App\Models\User;
 
 class UserController extends BaseController
 {
-    /**
-     * Autorizácia - všetky akcie vyžadujú prihlásenie
-     */
     public function authorize(Request $request, string $action): bool
     {
         return $this->app->getAuthenticator()->getUser()->isLoggedIn();
     }
 
-    /**
-     * Zobrazenie profilu používateľa
-     */
     public function index(Request $request): Response
     {
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $currentUser = User::getOne($userId);
-        
+
         if (!$currentUser) {
             return $this->redirect($this->url('auth.login'));
         }
@@ -32,22 +26,16 @@ class UserController extends BaseController
         return $this->html(['currentUser' => $currentUser]);
     }
 
-    /**
-     * Alias pre index - zobrazenie profilu
-     */
     public function profile(Request $request): Response
     {
         return $this->index($request);
     }
 
-    /**
-     * Zobrazenie formulára pre úpravu profilu
-     */
     public function edit(Request $request): Response
     {
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $currentUser = User::getOne($userId);
-        
+
         if (!$currentUser) {
             return $this->redirect($this->url('auth.login'));
         }
@@ -55,14 +43,11 @@ class UserController extends BaseController
         return $this->html(['currentUser' => $currentUser]);
     }
 
-    /**
-     * Aktualizácia profilu
-     */
     public function update(Request $request): Response
     {
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $currentUser = User::getOne($userId);
-        
+
         if (!$currentUser) {
             return $this->redirect($this->url('auth.login'));
         }
@@ -80,8 +65,7 @@ class UserController extends BaseController
         $currentUser->meno = htmlspecialchars(trim($request->value('meno')));
         $currentUser->priezvisko = htmlspecialchars(trim($request->value('priezvisko')));
         $currentUser->telefon = htmlspecialchars(trim($request->value('telefon')));
-        
-        // Email môže byť upravený len ak nie je duplicitný
+
         $newEmail = trim($request->value('email'));
         if ($newEmail !== $currentUser->email) {
             if (User::emailExists($newEmail)) {
@@ -102,14 +86,11 @@ class UserController extends BaseController
         }
     }
 
-    /**
-     * Zmena hesla
-     */
     public function changePassword(Request $request): Response
     {
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $currentUser = User::getOne($userId);
-        
+
         if (!$currentUser) {
             return $this->redirect($this->url('auth.login'));
         }
@@ -154,9 +135,6 @@ class UserController extends BaseController
         return $this->html(['currentUser' => $currentUser]);
     }
 
-    /**
-     * Validácia dát profilu
-     */
     private function validate(Request $request, User $user): array
     {
         $errors = [];

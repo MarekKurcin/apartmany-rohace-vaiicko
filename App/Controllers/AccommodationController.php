@@ -14,26 +14,17 @@ use App\Models\Reservation;
 
 class AccommodationController extends BaseController
 {
-    /**
-     * Autorizácia - index a show sú verejné, ostatné vyžadujú prihlásenie
-     */
     public function authorize(Request $request, string $action): bool
     {
-        // Verejné akcie (vrátane AJAX filtrovania a kalendára)
         if (in_array($action, ['index', 'show', 'filterAjax', 'getAvailability', 'getGalleryImages'])) {
             return true;
         }
 
-        // Ostatné vyžadujú prihlásenie
         return $this->app->getAuthenticator()->getUser()->isLoggedIn();
     }
 
-    /**
-     * Zobrazenie zoznamu ubytovaní
-     */
     public function index(Request $request): Response
     {
-        // Spracovanie vybavenia z checkboxov
         $vybavenieArr = $request->value('vybavenie_arr');
         $vybavenie = '';
         if (is_array($vybavenieArr) && !empty($vybavenieArr)) {
@@ -42,7 +33,6 @@ class AccommodationController extends BaseController
             $vybavenie = $request->value('vybavenie');
         }
 
-        // Získanie filtrov z GET
         $filters = [
             'kapacita' => $request->value('kapacita'),
             'max_cena' => $request->value('max_cena'),
@@ -50,7 +40,6 @@ class AccommodationController extends BaseController
             'zoradenie' => $request->value('zoradenie') ?: 'najnovsie'
         ];
 
-        // Vyhľadávanie s filtrami
         $accommodations = Accommodation::search($filters);
 
         return $this->html([
@@ -59,14 +48,11 @@ class AccommodationController extends BaseController
         ]);
     }
 
-    /**
-     * Zobrazenie detailu ubytovania
-     */
     public function show(Request $request): Response
     {
         $id = (int)$request->value('id');
         $accommodation = Accommodation::getOne($id);
-        
+
         if (!$accommodation) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'not_found']));
         }
@@ -74,7 +60,7 @@ class AccommodationController extends BaseController
         $attractions = $accommodation->getAttractions();
         $reviews = $accommodation->getReviews();
         $averageRating = $accommodation->getAverageRating();
-        
+
         return $this->html([
             'accommodation' => $accommodation,
             'attractions' => $attractions,
@@ -83,9 +69,6 @@ class AccommodationController extends BaseController
         ]);
     }
 
-    /**
-     * Zobrazenie formulára pre vytvorenie
-     */
     public function create(Request $request): Response
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -95,19 +78,15 @@ class AccommodationController extends BaseController
         return $this->html();
     }
 
-    /**
-     * Uloženie nového ubytovania
-     */
     public function store(Request $request): Response
     {
-        // Kontrola prihlásenia
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
             return $this->redirect($this->url('auth.login'));
         }
 
         $errors = $this->validate($request);
 
-        $imageResult = $this->handleImageUpload();
+        $imageResult = $this->handleImageUpload($request);
         if ($imageResult['error']) {
             $errors['obrazok'] = $imageResult['error'];
         }
@@ -119,7 +98,6 @@ class AccommodationController extends BaseController
             ], viewName: 'create');
         }
 
-        // Urcenie obrazka - priorita: upload > URL
         $obrazok = null;
         if ($imageResult['path']) {
             $obrazok = $imageResult['path'];
@@ -146,9 +124,6 @@ class AccommodationController extends BaseController
         }
     }
 
-    /**
-     * Zobrazenie formulára pre editáciu
-     */
     public function edit(Request $request): Response
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -157,23 +132,19 @@ class AccommodationController extends BaseController
 
         $id = (int)$request->value('id');
         $accommodation = Accommodation::getOne($id);
-        
+
         if (!$accommodation) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'not_found']));
         }
 
-        // Kontrola oprávnenia (len vlastník alebo admin)
         $user = User::getOne($this->app->getAuthenticator()->getUser()->getId());
         if ($accommodation->user_id != $user->id && !$user->isAdmin()) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'unauthorized']));
         }
-        
+
         return $this->html(['accommodation' => $accommodation]);
     }
 
-    /**
-     * Aktualizácia ubytovania
-     */
     public function update(Request $request): Response
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -182,12 +153,11 @@ class AccommodationController extends BaseController
 
         $id = (int)$request->value('id');
         $accommodation = Accommodation::getOne($id);
-        
+
         if (!$accommodation) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'not_found']));
         }
 
-        // Kontrola oprávnenia
         $user = User::getOne($this->app->getAuthenticator()->getUser()->getId());
         if ($accommodation->user_id != $user->id && !$user->isAdmin()) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'unauthorized']));
@@ -195,7 +165,7 @@ class AccommodationController extends BaseController
 
         $errors = $this->validate($request);
 
-        $imageResult = $this->handleImageUpload();
+        $imageResult = $this->handleImageUpload($request);
         if ($imageResult['error']) {
             $errors['obrazok'] = $imageResult['error'];
         }
@@ -215,7 +185,6 @@ class AccommodationController extends BaseController
         $accommodation->cena_za_noc = (float)$request->value('cena_za_noc');
         $accommodation->vybavenie = htmlspecialchars(trim($request->value('vybavenie')));
 
-        // Aktualizacia obrazka - priorita: upload > URL > ponechat povodny
         if ($imageResult['path']) {
             $this->deleteOldImage($accommodation->obrazok);
             $accommodation->obrazok = $imageResult['path'];
@@ -234,9 +203,6 @@ class AccommodationController extends BaseController
         }
     }
 
-    /**
-     * Vymazanie ubytovania
-     */
     public function delete(Request $request): Response
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -245,12 +211,11 @@ class AccommodationController extends BaseController
 
         $id = (int)$request->value('id');
         $accommodation = Accommodation::getOne($id);
-        
+
         if (!$accommodation) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'not_found']));
         }
 
-        // Kontrola oprávnenia
         $user = User::getOne($this->app->getAuthenticator()->getUser()->getId());
         if ($accommodation->user_id != $user->id && !$user->isAdmin()) {
             return $this->redirect($this->url('accommodation.index', ['error' => 'unauthorized']));
@@ -265,32 +230,28 @@ class AccommodationController extends BaseController
         }
     }
 
-    /**
-     * Spracovanie uploadu obrazka
-     * @return array ['path' => string|null, 'error' => string|null]
-     */
-    private function handleImageUpload(): array
+    private function handleImageUpload(Request $request): array
     {
-        if (!isset($_FILES['obrazok']) || $_FILES['obrazok']['error'] === UPLOAD_ERR_NO_FILE) {
+        $uploadedFile = $request->file('obrazok');
+        
+        if ($uploadedFile === null || $uploadedFile->getError() === UPLOAD_ERR_NO_FILE) {
             return ['path' => null, 'error' => null];
         }
 
-        $file = $_FILES['obrazok'];
-
-        if ($file['error'] !== UPLOAD_ERR_OK) {
-            return ['path' => null, 'error' => 'Chyba pri nahravani suboru'];
+        if (!$uploadedFile->isOk()) {
+            return ['path' => null, 'error' => $uploadedFile->getErrorMessage() ?? 'Chyba pri nahravani suboru'];
         }
 
         $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($file['tmp_name']);
+        $mimeType = $finfo->file($uploadedFile->getFileTempPath());
 
         if (!in_array($mimeType, $allowedTypes)) {
             return ['path' => null, 'error' => 'Povolene su len JPG, PNG a WebP obrazky'];
         }
 
         $maxSize = 5 * 1024 * 1024;
-        if ($file['size'] > $maxSize) {
+        if ($uploadedFile->getSize() > $maxSize) {
             return ['path' => null, 'error' => 'Maximalna velkost suboru je 5MB'];
         }
 
@@ -306,16 +267,13 @@ class AccommodationController extends BaseController
 
         $destination = $uploadDir . $newFilename;
 
-        if (move_uploaded_file($file['tmp_name'], $destination)) {
+        if ($uploadedFile->store($destination)) {
             return ['path' => '/uploads/accommodations/' . $newFilename, 'error' => null];
         }
 
         return ['path' => null, 'error' => 'Nepodarilo sa ulozit subor'];
     }
 
-    /**
-     * Vymazanie stareho obrazka
-     */
     private function deleteOldImage(?string $imagePath): void
     {
         if ($imagePath && strpos($imagePath, '/uploads/accommodations/') === 0) {
@@ -326,9 +284,6 @@ class AccommodationController extends BaseController
         }
     }
 
-    /**
-     * Validácia dát
-     */
     private function validate(Request $request): array
     {
         $errors = [];
@@ -356,14 +311,9 @@ class AccommodationController extends BaseController
         return $errors;
     }
 
-    /**
-     * AJAX API - Filtrovanie ubytovaní
-     * Vracia JSON s ubytovaniami podľa filtrov
-     */
     public function filterAjax(Request $request): JsonResponse
     {
         try {
-            // Spracovanie vybavenia z checkboxov
             $vybavenieArr = $request->value('vybavenie_arr');
             $vybavenie = '';
             if (is_array($vybavenieArr) && !empty($vybavenieArr)) {
@@ -383,7 +333,6 @@ class AccommodationController extends BaseController
 
             $result = [];
             foreach ($accommodations as $acc) {
-                // Bezpecne ziskanie obrazka
                 $obrazok = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800';
                 try {
                     $primary = $acc->getPrimaryImage();
@@ -393,7 +342,6 @@ class AccommodationController extends BaseController
                         $obrazok = $acc->obrazok;
                     }
                 } catch (\Exception $imgEx) {
-                    // Ignorujeme chybu obrazka
                 }
 
                 $result[] = [
@@ -421,13 +369,8 @@ class AccommodationController extends BaseController
         }
     }
 
-    /**
-     * AJAX API - Pridanie recenzie
-     * Uloží novú recenziu a vráti JSON odpoveď
-     */
     public function storeReview(Request $request): JsonResponse
     {
-        // Kontrola prihlásenia
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
             return new JsonResponse([
                 'success' => false,
@@ -440,7 +383,6 @@ class AccommodationController extends BaseController
         $hodnotenie = (int)$request->value('hodnotenie');
         $komentar = trim($request->value('komentar') ?? '');
 
-        // Validácia
         if ($accommodationId <= 0) {
             return new JsonResponse([
                 'success' => false,
@@ -455,7 +397,6 @@ class AccommodationController extends BaseController
             ]);
         }
 
-        // Kontrola či ubytovanie existuje
         $accommodation = Accommodation::getOne($accommodationId);
         if (!$accommodation) {
             return new JsonResponse([
@@ -464,7 +405,6 @@ class AccommodationController extends BaseController
             ]);
         }
 
-        // Kontrola či už používateľ nehodnotil
         if (Review::hasUserReviewed($userId, $accommodationId)) {
             return new JsonResponse([
                 'success' => false,
@@ -472,7 +412,6 @@ class AccommodationController extends BaseController
             ]);
         }
 
-        // Uloženie recenzie
         try {
             $review = new Review();
             $review->user_id = $userId;
@@ -482,7 +421,6 @@ class AccommodationController extends BaseController
             $review->created_at = date('Y-m-d H:i:s');
             $review->save();
 
-            // Získanie mena používateľa pre odpoveď
             $user = User::getOne($userId);
 
             return new JsonResponse([
@@ -506,12 +444,8 @@ class AccommodationController extends BaseController
         }
     }
 
-    /**
-     * AJAX API - Vymazanie recenzie (len admin)
-     */
     public function deleteReview(Request $request): JsonResponse
     {
-        // Kontrola prihlásenia
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
             return new JsonResponse([
                 'success' => false,
@@ -519,7 +453,6 @@ class AccommodationController extends BaseController
             ]);
         }
 
-        // Kontrola admin práv
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $currentUser = User::getOne($userId);
 
@@ -562,9 +495,6 @@ class AccommodationController extends BaseController
         }
     }
 
-    /**
-     * AJAX API - Získanie obsadených dátumov pre kalendár
-     */
     public function getAvailability(Request $request): JsonResponse
     {
         $accommodationId = (int)$request->value('id');
@@ -596,9 +526,6 @@ class AccommodationController extends BaseController
         ]);
     }
 
-    /**
-     * Zoznam vlastných ubytovaní pre ubytovateľa
-     */
     public function myList(Request $request): Response
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -614,7 +541,6 @@ class AccommodationController extends BaseController
 
         $accommodations = Accommodation::getAll("user_id = ?", [$userId]);
 
-        // Pridáme štatistiky ku každému ubytovaniu
         $accommodationsWithStats = [];
         foreach ($accommodations as $acc) {
             $stats = Reservation::getAccommodationStats($acc->id);
@@ -629,9 +555,6 @@ class AccommodationController extends BaseController
         ]);
     }
 
-    /**
-     * AJAX - Získať obrázky galérie
-     */
     public function getGalleryImages(Request $request): JsonResponse
     {
         $accommodationId = (int)$request->value('id');
@@ -649,9 +572,6 @@ class AccommodationController extends BaseController
         ]);
     }
 
-    /**
-     * AJAX - Upload obrázkov do galérie
-     */
     public function uploadGalleryImages(Request $request): JsonResponse
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -665,7 +585,6 @@ class AccommodationController extends BaseController
             return new JsonResponse(['success' => false, 'error' => 'Ubytovanie neexistuje']);
         }
 
-        // Kontrola oprávnenia
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $user = User::getOne($userId);
         if ($accommodation->user_id != $userId && !$user->isAdmin()) {
@@ -690,7 +609,7 @@ class AccommodationController extends BaseController
 
         for ($i = 0; $i < count($files['name']); $i++) {
             if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
-            if ($currentCount + count($uploadedImages) >= 10) break; // Max 10 obrázkov
+            if ($currentCount + count($uploadedImages) >= 10) break;
 
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($files['tmp_name'][$i]);
@@ -726,9 +645,6 @@ class AccommodationController extends BaseController
         ]);
     }
 
-    /**
-     * AJAX - Vymazať obrázok z galérie
-     */
     public function deleteGalleryImage(Request $request): JsonResponse
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -753,7 +669,6 @@ class AccommodationController extends BaseController
         $wasPrimary = $image->is_primary;
         $image->deleteWithFile();
 
-        // Ak bol primárny, nastavíme prvý obrázok ako primárny
         if ($wasPrimary) {
             $images = AccommodationImage::getByAccommodation($accommodation->id);
             if (!empty($images)) {
@@ -764,9 +679,6 @@ class AccommodationController extends BaseController
         return new JsonResponse(['success' => true]);
     }
 
-    /**
-     * AJAX - Nastaviť primárny obrázok
-     */
     public function setPrimaryImage(Request $request): JsonResponse
     {
         if (!$this->app->getAuthenticator()->getUser()->isLoggedIn()) {

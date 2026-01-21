@@ -1,10 +1,4 @@
 <?php
-
-/** @var \Framework\Support\LinkGenerator $link */
-/** @var \App\Models\User $currentUser */
-/** @var array $stats */
-/** @var array $recentUsers */
-/** @var array $recentAccommodations */
 ?>
 
 <div class="container-fluid mt-4">
@@ -17,7 +11,6 @@
         </div>
     </div>
 
-    <!-- Štatistiky -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
             <div class="card text-white bg-primary">
@@ -84,7 +77,6 @@
         </div>
     </div>
 
-    <!-- Rýchle akcie -->
     <div class="row mb-4">
         <div class="col">
             <div class="card">

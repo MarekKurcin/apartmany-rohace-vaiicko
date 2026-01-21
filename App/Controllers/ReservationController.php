@@ -11,17 +11,11 @@ use App\Models\User;
 
 class ReservationController extends BaseController
 {
-    /**
-     * Autorizácia - všetky akcie vyžadujú prihlásenie
-     */
     public function authorize(Request $request, string $action): bool
     {
         return $this->app->getAuthenticator()->getUser()->isLoggedIn();
     }
 
-    /**
-     * Zoznam mojich rezervácií
-     */
     public function index(Request $request): Response
     {
         $userId = $this->app->getAuthenticator()->getUser()->getId();
@@ -32,9 +26,6 @@ class ReservationController extends BaseController
         ]);
     }
 
-    /**
-     * Formulár pre vytvorenie rezervácie
-     */
     public function create(Request $request): Response
     {
         $accommodationId = (int)$request->value('id');
@@ -49,9 +40,6 @@ class ReservationController extends BaseController
         ]);
     }
 
-    /**
-     * Uloženie novej rezervácie
-     */
     public function store(Request $request): Response
     {
         $accommodationId = (int)$request->value('accommodation_id');
@@ -75,7 +63,6 @@ class ReservationController extends BaseController
         $datumDo = $request->value('datum_do');
         $pocetOsob = (int)$request->value('pocet_osob');
 
-        // Kontrola dostupnosti
         if (!Reservation::isAvailable($accommodationId, $datumOd, $datumDo)) {
             return $this->html([
                 'errors' => ['datum' => 'Vybraný termín nie je dostupný'],
@@ -101,9 +88,6 @@ class ReservationController extends BaseController
         }
     }
 
-    /**
-     * Detail rezervácie
-     */
     public function show(Request $request): Response
     {
         $id = (int)$request->value('id');
@@ -113,7 +97,6 @@ class ReservationController extends BaseController
             return $this->redirect($this->url('reservation.index', ['error' => 'not_found']));
         }
 
-        // Kontrola či je to moja rezervácia alebo som ubytovateľ/admin
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $user = User::getOne($userId);
         $accommodation = $reservation->getAccommodation();
@@ -129,9 +112,6 @@ class ReservationController extends BaseController
         ]);
     }
 
-    /**
-     * Zrušenie rezervácie (vlastník rezervácie)
-     */
     public function cancel(Request $request): Response
     {
         $id = (int)$request->value('id');
@@ -143,12 +123,10 @@ class ReservationController extends BaseController
 
         $userId = $this->app->getAuthenticator()->getUser()->getId();
 
-        // Len vlastník rezervácie môže zrušiť
         if ($reservation->user_id != $userId) {
             return $this->redirect($this->url('reservation.index', ['error' => 'unauthorized']));
         }
 
-        // Len čakajúce alebo potvrdené sa dajú zrušiť
         if (!in_array($reservation->stav, ['cakajuca', 'potvrdena'])) {
             return $this->redirect($this->url('reservation.index', ['error' => 'cannot_cancel']));
         }
@@ -161,24 +139,18 @@ class ReservationController extends BaseController
         }
     }
 
-    /**
-     * Správa rezervácií pre ubytovateľa
-     */
     public function manage(Request $request): Response
     {
         $userId = $this->app->getAuthenticator()->getUser()->getId();
         $user = User::getOne($userId);
 
-        // Len ubytovateľ alebo admin
         if (!$user->isUbytovatel()) {
             return $this->redirect($this->url('home.index', ['error' => 'unauthorized']));
         }
 
-        // Získať všetky ubytovania tohto používateľa
         $accommodations = Accommodation::getAll("user_id = ?", [$userId]);
         $accommodationIds = array_map(fn($a) => $a->id, $accommodations);
 
-        // Získať rezervácie pre tieto ubytovania
         $reservations = [];
         foreach ($accommodations as $accommodation) {
             $accReservations = Reservation::getByAccommodation($accommodation->id);
@@ -187,18 +159,15 @@ class ReservationController extends BaseController
             }
         }
 
-        // Zoradiť podľa dátumu (najnovšie prvé)
         usort($reservations, function($a, $b) {
             return strtotime($b->datum_od) - strtotime($a->datum_od);
         });
 
-        // Štatistiky pre grafy
         $currentYear = (int)date('Y');
         $currentMonth = (int)date('m');
         $monthlyStats = Reservation::getMonthlyStats($accommodationIds, $currentYear);
         $occupancy = Reservation::getOccupancyForMonth($accommodationIds, $currentYear, $currentMonth);
 
-        // Štatistiky pre každé ubytovanie
         $accommodationStats = [];
         foreach ($accommodations as $acc) {
             $accommodationStats[$acc->id] = Reservation::getAccommodationStats($acc->id);
@@ -215,9 +184,6 @@ class ReservationController extends BaseController
         ]);
     }
 
-    /**
-     * Potvrdenie rezervácie (ubytovateľ)
-     */
     public function confirm(Request $request): Response
     {
         $id = (int)$request->value('id');
@@ -231,7 +197,6 @@ class ReservationController extends BaseController
         $user = User::getOne($userId);
         $accommodation = $reservation->getAccommodation();
 
-        // Len vlastník ubytovania alebo admin
         if ($accommodation->user_id != $userId && !$user->isAdmin()) {
             return $this->redirect($this->url('reservation.manage', ['error' => 'unauthorized']));
         }
@@ -248,9 +213,6 @@ class ReservationController extends BaseController
         }
     }
 
-    /**
-     * Zamietnutie rezervácie (ubytovateľ)
-     */
     public function reject(Request $request): Response
     {
         $id = (int)$request->value('id');
@@ -264,7 +226,6 @@ class ReservationController extends BaseController
         $user = User::getOne($userId);
         $accommodation = $reservation->getAccommodation();
 
-        // Len vlastník ubytovania alebo admin
         if ($accommodation->user_id != $userId && !$user->isAdmin()) {
             return $this->redirect($this->url('reservation.manage', ['error' => 'unauthorized']));
         }
@@ -281,9 +242,6 @@ class ReservationController extends BaseController
         }
     }
 
-    /**
-     * Export rezervácií do CSV
-     */
     public function exportCsv(Request $request): Response
     {
         $userId = $this->app->getAuthenticator()->getUser()->getId();
@@ -351,9 +309,6 @@ class ReservationController extends BaseController
         exit;
     }
 
-    /**
-     * Validácia údajov rezervácie
-     */
     private function validate(Request $request, Accommodation $accommodation): array
     {
         $errors = [];

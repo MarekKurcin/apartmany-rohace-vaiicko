@@ -4,9 +4,6 @@ namespace App\Auth;
 
 use Framework\Core\IIdentity;
 
-/**
- * Database-based identity implementation
- */
 class DbIdentity implements IIdentity
 {
     private int $id;

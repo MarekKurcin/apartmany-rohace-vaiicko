@@ -7,31 +7,18 @@ use Framework\Core\BaseController;
 use Framework\Http\Request;
 use Framework\Http\Responses\Response;
 
-/**
- * Class AuthController
- * Kontrolér pre autentifikáciu používateľov
- */
 class AuthController extends BaseController
 {
-    /**
-     * Autorizácia - všetky akcie sú verejné
-     */
     public function authorize(Request $request, string $action): bool
     {
         return true;
     }
 
-    /**
-     * Index action - redirect to login
-     */
     public function index(Request $request): Response
     {
         return $this->redirect($this->url('auth.login'));
     }
 
-    /**
-     * Zobrazenie prihlasovacieho formulára
-     */
     public function login(Request $request): Response
     {
         if ($this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -41,9 +28,6 @@ class AuthController extends BaseController
         return $this->html();
     }
 
-    /**
-     * Spracovanie prihlásenia
-     */
     public function loginPost(Request $request): Response
     {
         $email = trim($request->value('email') ?? '');
@@ -63,7 +47,6 @@ class AuthController extends BaseController
             return $this->html(['errors' => $errors, 'old' => ['email' => $email]], 'login');
         }
 
-        // Try to authenticate using the framework's authenticator
         if ($this->app->getAuthenticator()->login($email, $heslo)) {
             return $this->redirect($this->url('home.index'));
         } else {
@@ -74,9 +57,6 @@ class AuthController extends BaseController
         }
     }
 
-    /**
-     * Zobrazenie registračného formulára
-     */
     public function register(Request $request): Response
     {
         if ($this->app->getAuthenticator()->getUser()->isLoggedIn()) {
@@ -86,9 +66,6 @@ class AuthController extends BaseController
         return $this->html();
     }
 
-    /**
-     * Spracovanie registrácie
-     */
     public function registerPost(Request $request): Response
     {
         $errors = $this->validateRegistration($request);
@@ -97,7 +74,6 @@ class AuthController extends BaseController
             return $this->html(['errors' => $errors, 'old' => $request->post()], 'register');
         }
 
-        // Kontrola či email už existuje
         if (User::emailExists($request->value('email'))) {
             return $this->html([
                 'errors' => ['email' => 'Tento email je už registrovaný'],
@@ -126,18 +102,12 @@ class AuthController extends BaseController
         }
     }
 
-    /**
-     * Odhlásenie
-     */
     public function logout(Request $request): Response
     {
         $this->app->getAuthenticator()->logout();
         return $this->redirect($this->url('home.index', ['success' => 'logged_out']));
     }
 
-    /**
-     * Validácia registračných údajov
-     */
     private function validateRegistration(Request $request): array
     {
         $errors = [];

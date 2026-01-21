@@ -104,6 +104,7 @@ class App
 
                 // If the response is valid, send it to the client.
                 if ($response instanceof Response) {
+                    ob_end_clean();
                     $response->send();
                 } else {
                     throw new \Exception("Action " . $this->router->getFullControllerName() . "." .

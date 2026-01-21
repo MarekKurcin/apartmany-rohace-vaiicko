@@ -1,10 +1,5 @@
 <?php
 
-/** @var \Framework\Support\LinkGenerator $link */
-/** @var \App\Models\User $currentUser */
-/** @var array $errors */
-/** @var array $old */
-
 $errors = $errors ?? [];
 $old = $old ?? [];
 ?>

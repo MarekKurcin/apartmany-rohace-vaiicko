@@ -1,5 +1,4 @@
 <?php
-/** @var \Framework\Support\LinkGenerator $link */
 ?>
 
 <div class="container py-5">

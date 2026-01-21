@@ -42,11 +42,8 @@ class JsonResponse extends Response
      */
     protected function generate(): void
     {
-        // Set the content type header to indicate that the response body will contain JSON data.
         header('Content-Type: application/json');
-
-        // Encode the data as JSON and output it. The json_encode function converts the data into a JSON string.
-        // Any errors in encoding can be handled externally if needed.
-        echo json_encode($this->data);
+        print(json_encode($this->data));
+        flush();
     }
 }

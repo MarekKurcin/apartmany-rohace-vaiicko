@@ -9,7 +9,7 @@ use DateTime;
 class Reservation extends Model
 {
     protected static ?string $tableName = 'reservation';
-    
+
     protected ?int $id = null;
     protected ?int $user_id = null;
     protected ?int $accommodation_id = null;
@@ -19,41 +19,26 @@ class Reservation extends Model
     protected ?float $celkova_cena = null;
     protected ?string $stav = 'cakajuca';
 
-    /**
-     * Magic getter pre prístup k protected atribútom
-     */
     public function __get($name)
     {
         return $this->$name ?? null;
     }
 
-    /**
-     * Magic setter pre nastavenie protected atribútov
-     */
     public function __set($name, $value)
     {
         $this->$name = $value;
     }
 
-    /**
-     * Získať rezervácie používateľa
-     */
     public static function getByUser(int $userId): array
     {
         return self::getAll("user_id = ?", [$userId], "datum_od DESC");
     }
 
-    /**
-     * Získať rezervácie pre ubytovanie
-     */
     public static function getByAccommodation(int $accommodationId): array
     {
         return self::getAll("accommodation_id = ?", [$accommodationId], "datum_od DESC");
     }
 
-    /**
-     * Získať aktívne rezervácie
-     */
     public static function getActive(): array
     {
         return self::getAll(
@@ -63,88 +48,67 @@ class Reservation extends Model
         );
     }
 
-    /**
-     * Kontrola dostupnosti ubytovania v danom období
-     */
     public static function isAvailable(int $accommodationId, string $datumOd, string $datumDo, ?int $excludeReservationId = null): bool
     {
         $sql = "SELECT COUNT(*) as count FROM reservation
-                WHERE accommodation_id = ? 
+                WHERE accommodation_id = ?
                 AND stav IN ('cakajuca', 'potvrdena')
                 AND (
                     (datum_od <= ? AND datum_do >= ?) OR
                     (datum_od <= ? AND datum_do >= ?) OR
                     (datum_od >= ? AND datum_do <= ?)
                 )";
-        
+
         $params = [$accommodationId, $datumOd, $datumOd, $datumDo, $datumDo, $datumOd, $datumDo];
-        
+
         if ($excludeReservationId) {
             $sql .= " AND id != ?";
             $params[] = $excludeReservationId;
         }
-        
+
         $stmt = Connection::getInstance()->prepare($sql);
         $stmt->execute($params);
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
+
         return $result['count'] == 0;
     }
 
-    /**
-     * Vypočítať počet nocí
-     */
     public function getNightsCount(): int
     {
         if (!$this->datum_od || !$this->datum_do) {
             return 0;
         }
-        
+
         $dateOd = new DateTime($this->datum_od);
         $dateDo = new DateTime($this->datum_do);
         $interval = $dateOd->diff($dateDo);
-        
+
         return $interval->days;
     }
 
-    /**
-     * Vypočítať celkovú cenu
-     */
     public function calculateTotalPrice(float $cenaZaNoc): float
     {
         return $this->getNightsCount() * $cenaZaNoc;
     }
 
-    /**
-     * Potvrdiť rezerváciu
-     */
     public function confirm(): void
     {
         $this->stav = 'potvrdena';
         $this->save();
     }
 
-    /**
-     * Zrušiť rezerváciu
-     */
     public function cancel(): void
     {
         $this->stav = 'zrusena';
         $this->save();
     }
 
-    /**
-     * Označiť ako dokončenú
-     */
     public function complete(): void
     {
         $this->stav = 'dokoncena';
         $this->save();
     }
 
-    /**
-     * Získať používateľa
-     */
     public function getUser(): ?User
     {
         if ($this->user_id) {
@@ -153,9 +117,6 @@ class Reservation extends Model
         return null;
     }
 
-    /**
-     * Získať ubytovanie
-     */
     public function getAccommodation(): ?Accommodation
     {
         if ($this->accommodation_id) {
@@ -164,26 +125,17 @@ class Reservation extends Model
         return null;
     }
 
-    /**
-     * Kontrola či je rezervácia aktívna
-     */
     public function isActive(): bool
     {
-        return in_array($this->stav, ['cakajuca', 'potvrdena']) && 
+        return in_array($this->stav, ['cakajuca', 'potvrdena']) &&
                $this->datum_do >= date('Y-m-d');
     }
 
-    /**
-     * Kontrola či už rezervácia prebehla
-     */
     public function isPast(): bool
     {
         return $this->datum_do < date('Y-m-d');
     }
 
-    /**
-     * Získať farbu podľa stavu
-     */
     public function getStatusColor(): string
     {
         return match($this->stav) {
@@ -195,9 +147,6 @@ class Reservation extends Model
         };
     }
 
-    /**
-     * Získať preložený stav
-     */
     public function getStatusLabel(): string
     {
         return match($this->stav) {
@@ -209,12 +158,6 @@ class Reservation extends Model
         };
     }
 
-    /**
-     * Získať mesačné štatistiky pre ubytovania
-     * @param array $accommodationIds Pole ID ubytovaní
-     * @param int $year Rok
-     * @return array Štatistiky po mesiacoch
-     */
     public static function getMonthlyStats(array $accommodationIds, int $year): array
     {
         if (empty($accommodationIds)) {
@@ -271,13 +214,6 @@ class Reservation extends Model
         return $stats;
     }
 
-    /**
-     * Získať obsadenosť pre ubytovania v danom mesiaci
-     * @param array $accommodationIds Pole ID ubytovaní
-     * @param int $year Rok
-     * @param int $month Mesiac
-     * @return float Percentuálna obsadenosť
-     */
     public static function getOccupancyForMonth(array $accommodationIds, int $year, int $month): float
     {
         if (empty($accommodationIds)) {
@@ -319,13 +255,6 @@ class Reservation extends Model
         return min(100, round(($occupiedDays / $totalPossibleDays) * 100, 1));
     }
 
-    /**
-     * Získať obsadené dátumy pre ubytovanie (pre kalendár)
-     * @param int $accommodationId ID ubytovania
-     * @param int $year Rok
-     * @param int $month Mesiac
-     * @return array Pole obsadených dátumov
-     */
     public static function getBookedDates(int $accommodationId, int $year, int $month): array
     {
         $firstDay = sprintf('%04d-%02d-01', $year, $month);
@@ -359,11 +288,6 @@ class Reservation extends Model
         return $bookedDates;
     }
 
-    /**
-     * Získať štatistiky pre konkrétne ubytovanie
-     * @param int $accommodationId ID ubytovania
-     * @return array Štatistiky
-     */
     public static function getAccommodationStats(int $accommodationId): array
     {
         $sql = "SELECT

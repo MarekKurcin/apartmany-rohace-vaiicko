@@ -1,17 +1,12 @@
 <?php
-/** @var \Framework\Support\LinkGenerator $link */
-/** @var array $featuredAttractions */
-/** @var array $featuredAccommodations */
 ?>
 
-<!-- Hero sekcia -->
 <section class="hero-section">
     <div class="hero-overlay"></div>
     <div class="container hero-content">
         <h1 class="hero-title">Objavte krásy Roháčov</h1>
         <p class="hero-subtitle">Nájdite si dokonalé ubytovanie v srdci Západných Tatier</p>
         
-        <!-- Vyhľadávací formulár -->
         <div class="search-box">
             <form action="index.php" method="GET" class="row g-3">
                 <input type="hidden" name="c" value="Accommodation">
@@ -42,7 +37,6 @@
     </div>
 </section>
 
-<!-- Sekcia - Prečo si vybrať nás -->
 <section class="py-5">
     <div class="container">
         <h2 class="section-title text-center mb-5">Prečo si vybrať ubytovanie u nás?</h2>

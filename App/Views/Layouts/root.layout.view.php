@@ -1,8 +1,4 @@
 <?php
-
-/** @var string $contentHTML */
-/** @var \Framework\Auth\AppUser $user */
-/** @var \Framework\Support\LinkGenerator $link */
 ?>
 <!DOCTYPE html>
 <html lang="sk">
@@ -10,19 +6,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apartmány pod Roháčmi</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="<?= $link->asset('favicon.svg') ?>">
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- Vlastné CSS štýly -->
     <link href="<?= $link->asset('css/style.css') ?>" rel="stylesheet">
 </head>
 <body>
-    <!-- Navigácia -->
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
         <div class="container">
             <a class="navbar-brand" href="<?= $link->url('home.index') ?>">
@@ -56,7 +46,6 @@
                 </ul>
                 
                 <ul class="navbar-nav align-items-center">
-                    <!-- Dark mode toggle -->
                     <li class="nav-item me-2">
                         <button type="button" class="theme-toggle" id="themeToggle" title="Prepnúť tému">
                             <i class="bi bi-moon-fill" id="themeIcon"></i>
@@ -101,12 +90,10 @@
         </div>
     </nav>
 
-    <!-- Hlavný obsah -->
     <main class="main-content">
         <?= $contentHTML ?>
     </main>
 
-    <!-- Footer -->
     <footer class="footer-custom mt-5">
         <div class="container">
             <div class="row">
@@ -142,24 +129,19 @@
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Vlastný JavaScript -->
     <script src="<?= $link->asset('js/app.js') ?>"></script>
 
-    <!-- Dark Mode Script -->
     <script>
     (function() {
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const html = document.documentElement;
 
-        // Load saved theme or default to light
         const savedTheme = localStorage.getItem('theme') || 'light';
         html.setAttribute('data-theme', savedTheme);
         updateIcon(savedTheme);
 
-        // Toggle theme on button click
         themeToggle?.addEventListener('click', function() {
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';

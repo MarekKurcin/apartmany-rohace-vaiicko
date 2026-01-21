@@ -1,8 +1,4 @@
 <?php
-/** @var \App\Models\Accommodation $accommodation */
-/** @var array $errors */
-/** @var array $old */
-/** @var \Framework\Support\LinkGenerator $link */
 ?>
 
 <div class="container py-5">
@@ -13,7 +9,6 @@
                     <h4 class="mb-0"><i class="bi bi-calendar-plus"></i> Rezervácia ubytovania</h4>
                 </div>
                 <div class="card-body">
-                    <!-- Info o ubytovaní -->
                     <div class="card bg-light border mb-4">
                         <div class="card-body">
                             <div class="row align-items-center">
@@ -82,7 +77,6 @@
                             <?php endif; ?>
                         </div>
 
-                        <!-- Kalkulácia ceny -->
                         <div class="card bg-light mb-4">
                             <div class="card-body">
                                 <h6 class="card-title">Kalkulácia ceny</h6>
@@ -144,7 +138,6 @@ function calculatePrice() {
 }
 
 document.getElementById('datum_od').addEventListener('change', function() {
-    // Nastaviť minimum pre dátum odchodu
     const minDatumDo = new Date(this.value);
     minDatumDo.setDate(minDatumDo.getDate() + 1);
     document.getElementById('datum_do').min = minDatumDo.toISOString().split('T')[0];
@@ -153,6 +146,5 @@ document.getElementById('datum_od').addEventListener('change', function() {
 
 document.getElementById('datum_do').addEventListener('change', calculatePrice);
 
-// Počiatočný výpočet
 calculatePrice();
 </script>

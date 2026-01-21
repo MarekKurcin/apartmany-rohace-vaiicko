@@ -1,8 +1,5 @@
 <?php
 
-/** @var \Framework\Support\LinkGenerator $link */
-/** @var \App\Models\User $currentUser */
-
 $success = $_GET['success'] ?? null;
 ?>
 

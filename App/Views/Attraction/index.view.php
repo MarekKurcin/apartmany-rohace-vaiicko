@@ -1,8 +1,4 @@
 <?php
-/** @var array $attractions */
-/** @var array $types */
-/** @var array $filters */
-/** @var \Framework\Support\LinkGenerator $link */
 ?>
 
 <div class="container py-5">
@@ -14,7 +10,6 @@
         </span>
     </div>
 
-    <!-- AJAX Filtračný formulár -->
     <div class="card mb-4 filter-panel">
         <div class="card-header">
             <h5><i class="bi bi-funnel"></i> Filtrovanie</h5>
@@ -68,7 +63,6 @@
         </div>
     </div>
 
-    <!-- Tlačidlo pridať atrakciu (len pre adminov) -->
     <?php if (isset($user) && $user?->isLoggedIn()): ?>
         <?php
         $currentUser = \App\Models\User::getOne($user->getId());
@@ -82,7 +76,6 @@
         <?php endif; ?>
     <?php endif; ?>
 
-    <!-- Zoznam atrakcií -->
     <div class="row g-4" id="attractionGrid">
         <?php if (!empty($attractions)): ?>
             <?php foreach ($attractions as $attraction): ?>

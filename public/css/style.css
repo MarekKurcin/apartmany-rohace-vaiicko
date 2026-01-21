@@ -14,7 +14,6 @@
     --transition: all 0.3s ease;
 }
 
-/* 2. Navigácia - vlastný štýl */
 .navbar-custom {
     background: linear-gradient(135deg, var(--dark-color) 0%, var(--primary-color) 100%);
     box-shadow: var(--shadow);
@@ -55,7 +54,6 @@
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-/* 3. Hero sekcia */
 .hero-section {
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)),
                 url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920') center/cover no-repeat;
@@ -85,7 +83,6 @@
     opacity: 0.9;
 }
 
-/* 4. Vyhľadávací box */
 .search-box {
     background: white;
     border-radius: 15px;
@@ -101,7 +98,6 @@
     font-size: 0.9rem;
 }
 
-/* 5. Karty ubytovaní */
 .accommodation-card {
     border: none;
     border-radius: 15px;
@@ -166,7 +162,6 @@
     font-weight: 500;
 }
 
-/* 6. Karty atrakcií */
 .attraction-card {
     border: none;
     border-radius: 15px;
@@ -233,7 +228,6 @@
     padding: 0.5rem 1.2rem;
 }
 
-/* 7. Feature cards (prečo my) */
 .feature-card {
     padding: 2rem;
     background: white;
@@ -263,7 +257,6 @@
     color: white;
 }
 
-/* 8. Formuláre a autentifikácia */
 .auth-card {
     border: none;
     border-radius: 20px;
@@ -281,7 +274,6 @@
     box-shadow: 0 0 0 0.2rem rgba(64, 145, 108, 0.25);
 }
 
-/* 9. Detail ubytovania */
 .accommodation-detail-image,
 .attraction-detail-image {
     height: 400px;
@@ -305,7 +297,6 @@
     text-align: center;
 }
 
-/* 10. Footer */
 .footer-custom {
     background: linear-gradient(135deg, var(--dark-color) 0%, var(--primary-color) 100%);
     color: white;
@@ -334,7 +325,6 @@
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* 11. Filter panel */
 .filter-card {
     border: none;
     border-radius: 10px;
@@ -342,7 +332,6 @@
     background: var(--light-color);
 }
 
-/* 12. Hlavný obsah - margin pre fixed navbar */
 .main-content {
     min-height: calc(100vh - 200px);
 }
@@ -352,7 +341,6 @@ body {
     background-color: #f8faf9;
 }
 
-/* 13. Sekcie */
 .section-title {
     font-weight: 700;
     color: var(--dark-color);
@@ -372,7 +360,6 @@ body {
     border-radius: 2px;
 }
 
-/* 14. Password strength indicator */
 .password-strength {
     height: 5px;
     border-radius: 3px;
@@ -391,16 +378,15 @@ body {
     background: #28a745;
 }
 
-/* 15. Responzívny dizajn */
 @media (max-width: 992px) {
     .hero-title {
         font-size: 2.5rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1.2rem;
     }
-    
+
     .search-box {
         padding: 1.5rem;
     }
@@ -410,24 +396,24 @@ body {
     .hero-section {
         min-height: 70vh;
     }
-    
+
     .hero-title {
         font-size: 2rem;
     }
-    
+
     .hero-content {
         padding: 1.5rem;
     }
-    
+
     .accommodation-detail-image,
     .attraction-detail-image {
         height: 250px;
     }
-    
+
     .feature-card {
         padding: 1.5rem;
     }
-    
+
     .navbar-custom .navbar-brand {
         font-size: 1.1rem;
     }
@@ -437,18 +423,17 @@ body {
     .hero-title {
         font-size: 1.8rem;
     }
-    
+
     .search-box {
         padding: 1rem;
     }
-    
+
     .price-badge {
         font-size: 0.9rem;
         padding: 0.4rem 0.8rem;
     }
 }
 
-/* 16. Animácie */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -493,7 +478,6 @@ body {
     }
 }
 
-/* Triedy pre fade-in animacie */
 .fade-in {
     opacity: 0;
     animation: fadeInUp 0.6s ease forwards;
@@ -514,7 +498,6 @@ body {
     animation: fadeInScale 0.5s ease forwards;
 }
 
-/* Staggered delay pre karty - postupne zobrazenie */
 .fade-in-delay-1 { animation-delay: 0.1s; }
 .fade-in-delay-2 { animation-delay: 0.2s; }
 .fade-in-delay-3 { animation-delay: 0.3s; }
@@ -522,14 +505,12 @@ body {
 .fade-in-delay-5 { animation-delay: 0.5s; }
 .fade-in-delay-6 { animation-delay: 0.6s; }
 
-/* Karty bez animacie */
 .accommodation-card,
 .attraction-card,
 .feature-card {
     opacity: 1;
 }
 
-/* Hero content animacia */
 .hero-content {
     animation: fadeInUp 0.8s ease 0.2s forwards;
 }
@@ -544,30 +525,25 @@ body {
     animation: fadeInUp 0.6s ease 0.5s forwards;
 }
 
-/* Search box animacia */
 .search-box {
     opacity: 0;
     animation: fadeInScale 0.6s ease 0.7s forwards;
 }
 
-/* Section title animacia */
 .section-title {
     opacity: 0;
     animation: fadeInUp 0.5s ease forwards;
 }
 
-/* Auth card animacia */
 .auth-card {
     opacity: 0;
     animation: fadeInScale 0.6s ease 0.2s forwards;
 }
 
-/* Filter card - staticky bez animacie */
 .filter-card {
     opacity: 1;
 }
 
-/* 17. Alert štýly */
 .alert {
     border: none;
     border-radius: 10px;
@@ -583,7 +559,6 @@ body {
     color: #721c24;
 }
 
-/* 18. Breadcrumb */
 .breadcrumb {
     background: transparent;
     padding: 0;
@@ -598,7 +573,6 @@ body {
     text-decoration: underline;
 }
 
-/* 19. Tlačidlá */
 .btn-primary {
     background: linear-gradient(135deg, var(--gold-color), var(--primary-color));
     border: none;
@@ -626,7 +600,6 @@ body {
     border-color: var(--primary-color);
 }
 
-/* 20. Dropdown menu */
 .dropdown-menu {
     border: none;
     border-radius: 10px;
@@ -642,7 +615,6 @@ body {
     background-color: var(--light-color);
 }
 
-/* 21. AJAX Loading a animacie */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -662,7 +634,6 @@ body {
     padding: 2rem;
 }
 
-/* 22. Rating hviezdicky */
 .rating-star {
     transition: transform 0.15s ease, color 0.15s ease;
 }
@@ -676,18 +647,15 @@ body {
     gap: 0.25rem;
 }
 
-/* 23. AJAX filter vysledky */
 .accommodation-item {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* 24. Alert animacie */
 .alert.fade-out {
     opacity: 0;
     transition: opacity 0.5s ease;
 }
 
-/* 25. Vlastne farby pre konzistentny dizajn */
 .badge-count {
     background-color: var(--primary-color);
     color: white;
@@ -732,7 +700,6 @@ body {
     color: white;
 }
 
-/* 26. Zjednotene karty */
 .listing-card {
     border: none;
     border-radius: 12px;
@@ -785,7 +752,6 @@ body {
     margin-bottom: 0.4rem;
 }
 
-/* 27. Filter panel - staticke, citatelne */
 .filter-panel {
     background: var(--white);
     border: 1px solid rgba(0,0,0,0.08);
@@ -806,7 +772,6 @@ body {
     margin: 0;
 }
 
-/* 28. Prepisanie Bootstrap modrych farieb */
 .bg-primary {
     background-color: var(--primary-color) !important;
 }
@@ -886,11 +851,6 @@ body {
     background-color: var(--accent-color) !important;
 }
 
-/* ========================================
-   DARK MODE
-======================================== */
-
-/* Dark mode CSS variables */
 [data-theme="dark"] {
     --background-color: #1a1a2e;
     --white: #16213e;
@@ -905,20 +865,17 @@ body {
     --subtext-color: #b0b8c8;
 }
 
-/* Smooth transition for theme change */
 body, .card, .navbar-custom, .footer-custom,
 .form-control, .form-select, .btn,
 .dropdown-menu, .list-group-item, .table {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Dark mode body */
 [data-theme="dark"] body {
     background-color: var(--background-color);
     color: var(--text-color);
 }
 
-/* Dark mode headings - VSETKY NADPISY */
 [data-theme="dark"] h1,
 [data-theme="dark"] h2,
 [data-theme="dark"] h3,
@@ -934,7 +891,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--heading-color) !important;
 }
 
-/* Dark mode cards */
 [data-theme="dark"] .card {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -968,7 +924,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--subtext-color) !important;
 }
 
-/* Dark mode listing cards */
 [data-theme="dark"] .listing-card {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -987,7 +942,6 @@ body, .card, .navbar-custom, .footer-custom,
     border-color: var(--border-color);
 }
 
-/* Dark mode accommodation/attraction cards */
 [data-theme="dark"] .accommodation-card,
 [data-theme="dark"] .attraction-card {
     background-color: var(--card-bg);
@@ -1003,7 +957,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--subtext-color) !important;
 }
 
-/* Dark mode forms */
 [data-theme="dark"] .form-control,
 [data-theme="dark"] .form-select {
     background-color: var(--input-bg);
@@ -1035,7 +988,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--subtext-color) !important;
 }
 
-/* Dark mode tables */
 [data-theme="dark"] .table {
     color: var(--text-color);
     --bs-table-bg: transparent;
@@ -1076,7 +1028,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--text-color);
 }
 
-/* Dark mode dropdowns */
 [data-theme="dark"] .dropdown-menu {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -1095,7 +1046,6 @@ body, .card, .navbar-custom, .footer-custom,
     border-color: var(--border-color);
 }
 
-/* Dark mode list groups */
 [data-theme="dark"] .list-group-item {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -1112,7 +1062,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--heading-color);
 }
 
-/* Dark mode alerts */
 [data-theme="dark"] .alert-info {
     background-color: rgba(13, 202, 240, 0.15);
     border-color: rgba(13, 202, 240, 0.3);
@@ -1143,7 +1092,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: #ffd95c;
 }
 
-/* Dark mode text utilities */
 [data-theme="dark"] .text-muted {
     color: var(--subtext-color) !important;
 }
@@ -1164,12 +1112,10 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--mint-color);
 }
 
-/* Dark mode section title */
 [data-theme="dark"] .section-title {
     color: var(--heading-color) !important;
 }
 
-/* Dark mode feature cards */
 [data-theme="dark"] .feature-card {
     background-color: var(--card-bg);
     color: var(--text-color);
@@ -1180,7 +1126,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--heading-color) !important;
 }
 
-/* Dark mode price display */
 [data-theme="dark"] .price-display {
     background-color: var(--light-color);
     color: var(--text-color);
@@ -1191,7 +1136,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--text-color);
 }
 
-/* Dark mode footer */
 [data-theme="dark"] .footer-custom {
     background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
 }
@@ -1200,7 +1144,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: #9ca3af !important;
 }
 
-/* Dark mode breadcrumb */
 [data-theme="dark"] .breadcrumb {
     background-color: transparent;
 }
@@ -1213,7 +1156,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--subtext-color);
 }
 
-/* Dark mode filter panel */
 [data-theme="dark"] .filter-panel {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -1228,7 +1170,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--heading-color) !important;
 }
 
-/* Dark mode borders */
 [data-theme="dark"] .border,
 [data-theme="dark"] .border-top,
 [data-theme="dark"] .border-bottom {
@@ -1240,7 +1181,6 @@ body, .card, .navbar-custom, .footer-custom,
     opacity: 0.3;
 }
 
-/* Dark mode toggle button */
 .theme-toggle {
     background: transparent;
     border: none;
@@ -1256,7 +1196,6 @@ body, .card, .navbar-custom, .footer-custom,
     transform: scale(1.1);
 }
 
-/* Dark mode search box */
 [data-theme="dark"] .search-box {
     background-color: var(--card-bg);
 }
@@ -1265,19 +1204,16 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--text-color) !important;
 }
 
-/* Dark mode bg-light */
 [data-theme="dark"] .bg-light {
     background-color: var(--light-color) !important;
     color: var(--text-color) !important;
 }
 
-/* Dark mode img thumbnails */
 [data-theme="dark"] .img-thumbnail {
     background-color: var(--light-color);
     border-color: var(--border-color);
 }
 
-/* Dark mode badges */
 [data-theme="dark"] .badge.bg-secondary {
     background-color: #4a5068 !important;
     color: #e8e8e8 !important;
@@ -1288,7 +1224,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--mint-color) !important;
 }
 
-/* Dark mode calendar */
 [data-theme="dark"] .calendar-header {
     color: var(--subtext-color);
 }
@@ -1312,7 +1247,6 @@ body, .card, .navbar-custom, .footer-custom,
     border-color: var(--mint-color);
 }
 
-/* Dark mode modals */
 [data-theme="dark"] .modal-content {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -1332,34 +1266,28 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--heading-color) !important;
 }
 
-/* Dark mode auth card */
 [data-theme="dark"] .auth-card {
     background-color: var(--card-bg);
 }
 
-/* Dark mode strong and bold text */
 [data-theme="dark"] strong,
 [data-theme="dark"] b {
     color: var(--heading-color);
 }
 
-/* Dark mode paragraphs in cards */
 [data-theme="dark"] .card p,
 [data-theme="dark"] .card-body p {
     color: var(--text-color);
 }
 
-/* Dark mode icons in text */
 [data-theme="dark"] .bi {
     color: inherit;
 }
 
-/* Dark mode specific text classes */
 [data-theme="dark"] .text-justify {
     color: var(--text-color);
 }
 
-/* Dark mode review items */
 [data-theme="dark"] .review-item,
 [data-theme="dark"] #reviewsContainer > div {
     border-color: var(--border-color) !important;
@@ -1373,7 +1301,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--text-color);
 }
 
-/* Dark mode buttons outline */
 [data-theme="dark"] .btn-outline-secondary {
     color: var(--subtext-color);
     border-color: var(--border-color);
@@ -1385,7 +1312,6 @@ body, .card, .navbar-custom, .footer-custom,
     border-color: var(--border-color);
 }
 
-/* Dark mode nav pills/tabs */
 [data-theme="dark"] .nav-pills .nav-link {
     color: var(--text-color);
 }
@@ -1395,7 +1321,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: white;
 }
 
-/* Dark mode pagination */
 [data-theme="dark"] .page-link {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -1412,12 +1337,10 @@ body, .card, .navbar-custom, .footer-custom,
     border-color: var(--primary-color);
 }
 
-/* Dark mode close button */
 [data-theme="dark"] .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
 }
 
-/* Dark mode accordion */
 [data-theme="dark"] .accordion-item {
     background-color: var(--card-bg);
     border-color: var(--border-color);
@@ -1438,7 +1361,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--text-color);
 }
 
-/* Dark mode navigation */
 [data-theme="dark"] .navbar-custom {
     background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
     border-bottom: 1px solid var(--border-color);
@@ -1465,7 +1387,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: rgba(240, 246, 252, 0.85);
 }
 
-/* Dark mode card title links */
 [data-theme="dark"] .card-title a {
     color: var(--heading-color) !important;
 }
@@ -1474,7 +1395,6 @@ body, .card, .navbar-custom, .footer-custom,
     color: var(--secondary-color) !important;
 }
 
-/* Dark mode bg-white override */
 [data-theme="dark"] .bg-white {
     background-color: var(--card-bg) !important;
 }

@@ -1,7 +1,4 @@
 <?php
-/** @var \App\Models\Attraction $attraction */
-/** @var array $nearbyAccommodations */
-/** @var \Framework\Support\LinkGenerator $link */
 ?>
 
 <div class="container py-5">
@@ -14,7 +11,6 @@
     </nav>
 
     <div class="row">
-        <!-- Hlavný obsah -->
         <div class="col-lg-8">
             <div class="card shadow-sm mb-4">
                 <?php if ($attraction->obrazok): ?>
@@ -69,9 +65,7 @@
             </div>
 
             <!-- Tlačidlá pre admin -->
-            <?php
-            $isAdmin = isset($user) && $user->isLoggedIn() && \App\Models\User::getOne($user->getId())?->isAdmin();
-            ?>
+            <?php $isAdmin = isset($user) && $user->isLoggedIn() && \App\Models\User::getOne($user->getId())?->isAdmin(); ?>
             <?php if ($isAdmin): ?>
                 <div class="mb-3">
                     <a href="<?= $link->url('attraction.edit', ['id' => $attraction->id]) ?>"

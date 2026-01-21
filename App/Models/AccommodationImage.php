@@ -26,9 +26,6 @@ class AccommodationImage extends Model
         $this->$name = $value;
     }
 
-    /**
-     * Získať všetky obrázky pre ubytovanie
-     */
     public static function getByAccommodation(int $accommodationId): array
     {
         return self::getAll(
@@ -38,9 +35,6 @@ class AccommodationImage extends Model
         );
     }
 
-    /**
-     * Získať primárny obrázok pre ubytovanie
-     */
     public static function getPrimary(int $accommodationId): ?self
     {
         $images = self::getAll(
@@ -52,27 +46,18 @@ class AccommodationImage extends Model
         return $images[0] ?? null;
     }
 
-    /**
-     * Nastaviť tento obrázok ako primárny
-     */
     public function setPrimary(): bool
     {
-        // Najprv odznačíme všetky ostatné
         $sql = "UPDATE accommodation_image SET is_primary = 0 WHERE accommodation_id = ?";
         $stmt = Connection::getInstance()->prepare($sql);
         $stmt->execute([$this->accommodation_id]);
 
-        // Potom nastavíme tento ako primárny
         $this->is_primary = true;
         return $this->save();
     }
 
-    /**
-     * Vymazať obrázok aj súbor
-     */
     public function deleteWithFile(): bool
     {
-        // Vymazať súbor ak existuje
         if ($this->image_path && strpos($this->image_path, '/uploads/') === 0) {
             $fullPath = __DIR__ . '/../../public' . $this->image_path;
             if (file_exists($fullPath)) {
@@ -83,9 +68,6 @@ class AccommodationImage extends Model
         return $this->delete();
     }
 
-    /**
-     * Počet obrázkov pre ubytovanie
-     */
     public static function countByAccommodation(int $accommodationId): int
     {
         $sql = "SELECT COUNT(*) as count FROM accommodation_image WHERE accommodation_id = ?";

@@ -1,8 +1,5 @@
 <?php
 
-/** @var \Framework\Support\LinkGenerator $link */
-/** @var \App\Models\User $currentUser */
-
 $success = $_GET['success'] ?? null;
 ?>
 
@@ -57,7 +54,7 @@ $success = $_GET['success'] ?? null;
 
                     <div class="row mb-3">
                         <div class="col-md-4 fw-bold">Registrovaný:</div>
-                        <div class="col-md-8"><?= htmlspecialchars($currentUser->datum_vytvorenia) ?></div>
+                        <div class="col-md-8"><?= htmlspecialchars($currentUser->datum_vytvorenia ?? 'Neuvedené') ?></div>
                     </div>
 
                     <div class="d-flex gap-2 mt-4">

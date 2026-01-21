@@ -1,11 +1,6 @@
--- Apartmány pod Roháčmi - Databázová schéma
--- MySQL/MariaDB
-
--- Nastavenie kódovania
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 
--- Vymazanie existujúcich tabuliek (ak existujú)
 DROP TABLE IF EXISTS `review`;
 DROP TABLE IF EXISTS `accommodation_attraction`;
 DROP TABLE IF EXISTS `reservation`;

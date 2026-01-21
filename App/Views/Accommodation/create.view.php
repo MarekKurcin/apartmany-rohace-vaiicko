@@ -1,9 +1,5 @@
 <?php
 
-/** @var \Framework\Support\LinkGenerator $link */
-/** @var array $errors */
-/** @var array $old */
-
 $errors = $errors ?? [];
 $old = $old ?? [];
 ?>

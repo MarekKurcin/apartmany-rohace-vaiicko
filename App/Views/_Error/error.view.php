@@ -1,11 +1,5 @@
 <?php
-
-/** @var \Framework\Http\HttpException $exception */
-/** @var bool $showDetail */
-/** @var \Framework\Support\View $view */
-
 $view->setLayout(null);
-
 ?>
 
 <h1><?= $exception->getCode() . " - " . $exception->getMessage() ?></h1>

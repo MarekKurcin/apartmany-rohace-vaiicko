@@ -1,19 +1,10 @@
 <?php
-/** @var array $reservations */
-/** @var array $accommodations */
-/** @var array $monthlyStats */
-/** @var float $occupancy */
-/** @var array $accommodationStats */
-/** @var int $currentYear */
-/** @var \Framework\Support\LinkGenerator $link */
-
 $mesiacNazvy = [
     1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
     5 => 'Máj', 6 => 'Jún', 7 => 'Júl', 8 => 'Aug',
     9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Dec'
 ];
 
-// Celkové štatistiky
 $cakajuce = 0;
 $potvrdene = 0;
 $dokoncene = 0;
@@ -35,7 +26,6 @@ foreach ($reservations as $r) {
     }
 }
 
-// Pripravíme dáta pre grafy
 $prijmyPoMesiacoch = [];
 $rezervaciePoMesiacoch = [];
 foreach ($monthlyStats as $stat) {
@@ -46,7 +36,7 @@ foreach ($monthlyStats as $stat) {
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="bi bi-calendar-week"></i> Správa rezervácií</h1>
+        <h1><i class="bi bi-calendar-week"></i> Sprava rezervacii</h1>
         <div>
             <a href="<?= $link->url('accommodation.myList') ?>" class="btn btn-outline-primary me-2">
                 <i class="bi bi-house"></i> Moje ubytovania
@@ -96,7 +86,6 @@ foreach ($monthlyStats as $stat) {
         </div>
     <?php endif; ?>
 
-    <!-- Hlavné štatistiky -->
     <div class="row mb-4 g-3">
         <div class="col-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm">
@@ -132,12 +121,11 @@ foreach ($monthlyStats as $stat) {
         </div>
     </div>
 
-    <!-- Grafy -->
     <div class="row mb-4 g-3">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-0">
-                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Príjmy v roku <?= $currentYear ?></h5>
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Prijmy v roku <?= $currentYear ?></h5>
                 </div>
                 <div class="card-body">
                     <canvas id="revenueChart" height="200"></canvas>
@@ -156,11 +144,10 @@ foreach ($monthlyStats as $stat) {
         </div>
     </div>
 
-    <!-- Štatistiky podľa ubytovaní -->
     <?php if (!empty($accommodationStats)): ?>
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-0">
-            <h5 class="mb-0"><i class="bi bi-house"></i> Štatistiky podľa ubytovaní</h5>
+            <h5 class="mb-0"><i class="bi bi-house"></i> Statistiky podla ubytovani</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -211,10 +198,9 @@ foreach ($monthlyStats as $stat) {
     </div>
     <?php endif; ?>
 
-    <!-- Zoznam rezervácií -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Zoznam rezervácií</h5>
+            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Zoznam rezervacii</h5>
             <div class="d-flex gap-2">
                 <select id="filterStatus" class="form-select form-select-sm" style="width: auto;">
                     <option value="">Všetky stavy</option>
@@ -322,7 +308,6 @@ foreach ($monthlyStats as $stat) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Graf príjmov
     const revenueCtx = document.getElementById('revenueChart');
     if (revenueCtx) {
         new Chart(revenueCtx, {
@@ -360,7 +345,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Graf stavov
     const statusCtx = document.getElementById('statusChart');
     if (statusCtx) {
         new Chart(statusCtx, {
@@ -390,7 +374,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Filtrovanie tabuľky
     const filterStatus = document.getElementById('filterStatus');
     const filterAccommodation = document.getElementById('filterAccommodation');
     const rows = document.querySelectorAll('.reservation-row');

@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Validácia formulára ubytovania
     const accommodationForm = document.getElementById('accommodationForm');
     if (accommodationForm) {
         accommodationForm.addEventListener('submit', function(e) {
@@ -8,8 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
             }
         });
-        
-        // Live validácia
+
         accommodationForm.querySelectorAll('input, select, textarea').forEach(input => {
             input.addEventListener('blur', function() {
                 validateField(this);
@@ -21,8 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // Validácia formulára atrakcií
+
     const attractionForm = document.getElementById('attractionForm');
     if (attractionForm) {
         attractionForm.addEventListener('submit', function(e) {
@@ -30,15 +27,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
             }
         });
-        
+
         attractionForm.querySelectorAll('input, select, textarea').forEach(input => {
             input.addEventListener('blur', function() {
                 validateField(this);
             });
         });
     }
-    
-    // Validácia prihlasovacieho formulára
+
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
@@ -47,8 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-    // Validácia registračného formulára
+
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', function(e) {
@@ -56,16 +51,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
             }
         });
-        
-        // Password strength indicator
+
         const passwordInput = document.getElementById('heslo');
         if (passwordInput) {
             passwordInput.addEventListener('input', function() {
                 updatePasswordStrength(this.value);
             });
         }
-        
-        // Kontrola zhody hesiel
+
         const confirmPassword = document.getElementById('heslo_potvrdenie');
         if (confirmPassword) {
             confirmPassword.addEventListener('input', function() {
@@ -73,8 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
-    // Validácia rezervačného formulára
+
     const reservationForm = document.getElementById('reservationForm');
     if (reservationForm) {
         reservationForm.addEventListener('submit', function(e) {
@@ -82,12 +74,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
             }
         });
-        
-        // Nastavenie minimálneho dátumu (dnes)
+
         const today = new Date().toISOString().split('T')[0];
         const dateFrom = document.getElementById('datum_od');
         const dateTo = document.getElementById('datum_do');
-        
+
         if (dateFrom) {
             dateFrom.setAttribute('min', today);
             dateFrom.addEventListener('change', function() {
@@ -97,10 +88,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
 
-    
-    // 2.1 Smooth scroll pre anchor linky
+
+
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
@@ -113,14 +103,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // 2.2 Navbar scroll effect
+
     let lastScroll = 0;
     const navbar = document.querySelector('.navbar-custom');
-    
+
     window.addEventListener('scroll', function() {
         const currentScroll = window.pageYOffset;
-        
+
         if (navbar) {
             if (currentScroll > 100) {
                 navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
@@ -128,11 +117,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 navbar.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
             }
         }
-        
+
         lastScroll = currentScroll;
     });
-    
-    // 2.3 Lazy loading pre obrázky
+
     const lazyImages = document.querySelectorAll('img[data-src]');
     if (lazyImages.length > 0) {
         const imageObserver = new IntersectionObserver((entries, observer) => {
@@ -145,11 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
-        
+
         lazyImages.forEach(img => imageObserver.observe(img));
     }
-    
-    // 2.5 Auto-hide alerts (only success/danger notifications, not static info/secondary boxes)
+
     const notificationAlerts = document.querySelectorAll('.alert-success, .alert-danger');
     notificationAlerts.forEach(alert => {
         setTimeout(() => {
@@ -158,49 +145,47 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => alert.remove(), 500);
         }, 5000);
     });
-    
-    // 2.6 Character counter pre textareas
+
     document.querySelectorAll('textarea[maxlength]').forEach(textarea => {
         const maxLength = textarea.getAttribute('maxlength');
         const counter = document.createElement('small');
         counter.className = 'text-muted float-end';
         counter.textContent = `0 / ${maxLength}`;
         textarea.parentNode.appendChild(counter);
-        
+
         textarea.addEventListener('input', function() {
             counter.textContent = `${this.value.length} / ${maxLength}`;
         });
     });
 
+    initAjaxFilter();
+    initAjaxReview();
+    initAttractionFilter();
 });
 
 
 function validateField(field) {
     const value = field.value.trim();
     let isValid = true;
-    
-    // Required check
+
     if (field.hasAttribute('required') && value === '') {
         isValid = false;
     }
-    
-    // Min length check
+
     if (field.hasAttribute('minlength')) {
         const minLength = parseInt(field.getAttribute('minlength'));
         if (value.length < minLength) {
             isValid = false;
         }
     }
-    
-    // Email check
+
     if (field.type === 'email' && value !== '') {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) {
             isValid = false;
         }
     }
-    
-    // Number range check
+
     if (field.type === 'number') {
         const numValue = parseFloat(value);
         if (field.hasAttribute('min') && numValue < parseFloat(field.getAttribute('min'))) {
@@ -210,8 +195,7 @@ function validateField(field) {
             isValid = false;
         }
     }
-    
-    // Update UI
+
     if (isValid) {
         field.classList.remove('is-invalid');
         field.classList.add('is-valid');
@@ -219,75 +203,74 @@ function validateField(field) {
         field.classList.remove('is-valid');
         field.classList.add('is-invalid');
     }
-    
+
     return isValid;
 }
 
 function validateAccommodationForm() {
     const form = document.getElementById('accommodationForm');
     let isValid = true;
-    
+
     const nazov = form.querySelector('#nazov');
     const adresa = form.querySelector('#adresa');
     const kapacita = form.querySelector('#kapacita');
     const cena = form.querySelector('#cena_za_noc');
-    
+
     if (!validateField(nazov)) isValid = false;
     if (!validateField(adresa)) isValid = false;
     if (!validateField(kapacita)) isValid = false;
     if (!validateField(cena)) isValid = false;
-    
+
     return isValid;
 }
 
 function validateAttractionForm() {
     const form = document.getElementById('attractionForm');
     let isValid = true;
-    
+
     const nazov = form.querySelector('#nazov');
     const typ = form.querySelector('#typ');
-    
+
     if (!validateField(nazov)) isValid = false;
     if (!validateField(typ)) isValid = false;
-    
+
     return isValid;
 }
 
 function validateLoginForm() {
     const form = document.getElementById('loginForm');
     let isValid = true;
-    
+
     const email = form.querySelector('#email');
     const heslo = form.querySelector('#heslo');
-    
+
     if (!validateField(email)) isValid = false;
     if (!validateField(heslo)) isValid = false;
-    
+
     return isValid;
 }
 
 function validateRegisterForm() {
     const form = document.getElementById('registerForm');
     let isValid = true;
-    
+
     const fields = ['meno', 'priezvisko', 'email', 'heslo', 'heslo_potvrdenie'];
-    
+
     fields.forEach(fieldName => {
         const field = form.querySelector(`#${fieldName}`);
         if (field && !validateField(field)) {
             isValid = false;
         }
     });
-    
-    // Check password match
+
     const heslo = form.querySelector('#heslo');
     const hesloPotvrdenie = form.querySelector('#heslo_potvrdenie');
-    
+
     if (heslo && hesloPotvrdenie && heslo.value !== hesloPotvrdenie.value) {
         hesloPotvrdenie.classList.add('is-invalid');
         isValid = false;
     }
-    
+
     return isValid;
 }
 
@@ -295,27 +278,27 @@ function validateReservationForm() {
     const dateFrom = document.getElementById('datum_od');
     const dateTo = document.getElementById('datum_do');
     let isValid = true;
-    
+
     if (!dateFrom.value) {
         dateFrom.classList.add('is-invalid');
         isValid = false;
     }
-    
+
     if (!dateTo.value) {
         dateTo.classList.add('is-invalid');
         isValid = false;
     }
-    
+
     if (dateFrom.value && dateTo.value) {
         const from = new Date(dateFrom.value);
         const to = new Date(dateTo.value);
-        
+
         if (to <= from) {
             dateTo.classList.add('is-invalid');
             isValid = false;
         }
     }
-    
+
     return isValid;
 }
 
@@ -323,7 +306,7 @@ function validateReservationForm() {
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(inputId + '-icon');
-    
+
     if (input.type === 'password') {
         input.type = 'text';
         icon.classList.remove('bi-eye');
@@ -338,21 +321,19 @@ function togglePassword(inputId) {
 function updatePasswordStrength(password) {
     const strengthEl = document.getElementById('passwordStrength');
     if (!strengthEl) return;
-    
+
     let strength = 0;
-    
-    // Length check
+
     if (password.length >= 6) strength++;
     if (password.length >= 10) strength++;
-    
-    // Complexity checks
+
     if (/[A-Z]/.test(password)) strength++;
     if (/[a-z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    
+
     strengthEl.className = 'password-strength mt-2';
-    
+
     if (password.length === 0) {
         strengthEl.style.display = 'none';
     } else if (strength < 3) {
@@ -370,7 +351,7 @@ function updatePasswordStrength(password) {
 function checkPasswordMatch() {
     const heslo = document.getElementById('heslo');
     const hesloPotvrdenie = document.getElementById('heslo_potvrdenie');
-    
+
     if (heslo && hesloPotvrdenie) {
         if (heslo.value === hesloPotvrdenie.value && hesloPotvrdenie.value !== '') {
             hesloPotvrdenie.classList.remove('is-invalid');
@@ -388,7 +369,7 @@ function confirmDelete(id, type) {
         'attraction': 'atrakciu',
         'user': 'používateľa'
     };
-    
+
     if (confirm(`Naozaj chcete vymazať toto ${typeNames[type]}? Táto akcia sa nedá vrátiť späť.`)) {
         window.location.href = `index.php?page=${type}s&action=delete&id=${id}`;
     }
@@ -398,11 +379,11 @@ function confirmDelete(id, type) {
 function filterCards(searchInput, cardsSelector) {
     const searchValue = searchInput.value.toLowerCase();
     const cards = document.querySelectorAll(cardsSelector);
-    
+
     cards.forEach(card => {
         const text = card.textContent.toLowerCase();
         const parent = card.closest('.col-md-6, .col-lg-4');
-        
+
         if (text.includes(searchValue)) {
             if (parent) parent.style.display = '';
         } else {
@@ -411,7 +392,6 @@ function filterCards(searchInput, cardsSelector) {
     });
 }
 
-// Zoradenie kariet
 function sortCards(sortBy, order = 'asc') {
     const container = document.querySelector('.row.g-4');
     if (!container) return;
@@ -444,14 +424,6 @@ function sortCards(sortBy, order = 'asc') {
     cards.forEach(card => container.appendChild(card));
 }
 
-// ===========================================
-// AJAX FUNKCIE
-// ===========================================
-
-/**
- * AJAX Filtrovanie ubytovani
- * Dynamicke nacitanie ubytovani bez refreshu stranky
- */
 function initAjaxFilter() {
     const filterForm = document.getElementById('accommodationFilterForm');
     if (!filterForm) return;
@@ -463,7 +435,6 @@ function initAjaxFilter() {
         filterAccommodations();
     });
 
-    // Live filtrovanie pri zmene selectov a checkboxov
     let debounceTimer;
     filterForm.querySelectorAll('select').forEach(select => {
         select.addEventListener('change', function() {
@@ -472,7 +443,6 @@ function initAjaxFilter() {
         });
     });
 
-    // Checkboxy pre vybavenie - okamžité filtrovanie
     filterForm.querySelectorAll('.vybavenie-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             clearTimeout(debounceTimer);
@@ -485,7 +455,6 @@ function initAjaxFilter() {
         const params = new URLSearchParams();
 
         formData.forEach((value, key) => {
-            // Preskocime 'c' parameter, pretoze je v URL hardcoded
             if (value && key !== 'c') params.append(key, value);
         });
 
@@ -520,7 +489,6 @@ function initAjaxFilter() {
     function renderAccommodations(accommodations, count) {
         if (!accommodationGrid) return;
 
-        // Aktualizacia poctu vysledkov s gramaticky správnym textom
         const countBadge = document.getElementById('resultCount');
         const resultBadge = document.getElementById('resultBadge');
         if (countBadge) {
@@ -539,9 +507,9 @@ function initAjaxFilter() {
                 <div class="col-12">
                     <div class="alert alert-info text-center" role="alert">
                         <i class="bi bi-info-circle"></i>
-                        Nenasli sa ziadne ubytovania podla zadanych kriterii.
+                        Nenašli sa žiadne ubytovania podľa zadaných kritérií.
                         <br>
-                        <a href="javascript:void(0)" onclick="clearFilters()" class="alert-link">Zrusit filtre</a>
+                        <a href="javascript:void(0)" onclick="clearFilters()" class="alert-link">Zrušiť filtre</a>
                     </div>
                 </div>
             `;
@@ -574,7 +542,7 @@ function initAjaxFilter() {
                                 <i class="bi bi-geo-alt"></i> ${escapeHtml(acc.adresa)}
                             </p>
                             <p class="info-line">
-                                <i class="bi bi-people"></i> Kapacita: ${acc.kapacita} osob
+                                <i class="bi bi-people"></i> Kapacita: ${acc.kapacita} osôb
                             </p>
                             ${acc.popis ? `<p class="card-text">${escapeHtml(acc.popis)}</p>` : ''}
                             <div class="mb-2">
@@ -584,7 +552,7 @@ function initAjaxFilter() {
                         </div>
                         <div class="card-footer">
                             <a href="?c=Accommodation&a=show&id=${acc.id}" class="btn btn-card w-100">
-                                <i class="bi bi-eye"></i> Zobrazit detail
+                                <i class="bi bi-eye"></i> Zobraziť detail
                             </a>
                         </div>
                     </div>
@@ -610,21 +578,19 @@ function initAjaxFilter() {
 function clearFilters() {
     const filterForm = document.getElementById('accommodationFilterForm');
     if (filterForm) {
-        // Reset všetkých inputov
-        filterForm.reset();
-
-        // Explicitne resetuj selecty na prvú hodnotu
         filterForm.querySelectorAll('select').forEach(select => {
-            select.selectedIndex = 0;
+            if (select.name === 'zoradenie') {
+                select.value = 'najnovsie';
+            } else {
+                select.value = '';
+            }
         });
 
-        // Odškrtni všetky checkboxy
         filterForm.querySelectorAll('.vybavenie-checkbox').forEach(checkbox => {
             checkbox.checked = false;
         });
 
-        // Spusti filtrovanie
-        filterForm.dispatchEvent(new Event('submit'));
+        filterForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     }
 }
 
@@ -635,10 +601,6 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-/**
- * AJAX Pridavanie recenzii
- * Dynamicke pridanie recenzie bez refreshu stranky
- */
 function initAjaxReview() {
     const reviewForm = document.getElementById('reviewForm');
     if (!reviewForm) return;
@@ -648,7 +610,6 @@ function initAjaxReview() {
     const ratingStars = reviewForm.querySelectorAll('.rating-star');
     const ratingInput = document.getElementById('reviewRating');
 
-    // Interaktivne hviezdicky
     ratingStars.forEach(star => {
         star.addEventListener('click', function() {
             const value = this.dataset.value;
@@ -682,7 +643,6 @@ function initAjaxReview() {
         });
     }
 
-    // Odoslanie formulara
     reviewForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -690,7 +650,6 @@ function initAjaxReview() {
         const submitBtn = reviewForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
 
-        // Validacia
         if (!ratingInput.value || ratingInput.value < 1) {
             showReviewAlert('Vyberte prosim hodnotenie (1-5 hviezdicky)', 'warning');
             return;
@@ -713,18 +672,14 @@ function initAjaxReview() {
             submitBtn.innerHTML = originalText;
 
             if (data.success) {
-                // Pridat novu recenziu do zoznamu
                 addReviewToList(data.review);
 
-                // Aktualizovat priemerne hodnotenie
                 updateAverageRating(data.newAverage, data.reviewCount);
 
-                // Resetovat formular
                 reviewForm.reset();
                 ratingInput.value = '';
                 updateStars(0);
 
-                // Skryt formular (uzivatel uz hodnotil)
                 reviewForm.style.display = 'none';
 
                 showReviewAlert(data.message, 'success');
@@ -743,7 +698,6 @@ function initAjaxReview() {
     function addReviewToList(review) {
         if (!reviewsContainer) return;
 
-        // Ak je prazdny zoznam, odstranit placeholder
         const emptyMessage = reviewsContainer.querySelector('.text-muted');
         if (emptyMessage) emptyMessage.remove();
 
@@ -782,7 +736,6 @@ function initAjaxReview() {
             `;
         }
 
-        // Aktualizovat header
         if (reviewsHeader) {
             reviewsHeader.innerHTML = `<i class="bi bi-star"></i> Hodnotenia (${reviewCount})`;
         }
@@ -800,7 +753,6 @@ function initAjaxReview() {
         `;
         alertContainer.innerHTML = alertHtml;
 
-        // Auto-hide after 5 seconds
         setTimeout(() => {
             const alert = alertContainer.querySelector('.alert');
             if (alert) {
@@ -812,24 +764,7 @@ function initAjaxReview() {
     }
 }
 
-// Inicializacia AJAX funkcii na konci suboru
-document.addEventListener('DOMContentLoaded', function() {
-    initAjaxFilter();
-    initAjaxReview();
-    initAttractionFilter();
-    initStaggeredAnimations();
-});
 
-/**
- * Staggered animacie - vypnute pre staticke karty
- */
-function initStaggeredAnimations() {
-    // Animacie vypnute - karty su staticke
-}
-
-/**
- * AJAX Filtrovanie atrakcii
- */
 function initAttractionFilter() {
     const filterForm = document.getElementById('attractionFilterForm');
     if (!filterForm) return;
@@ -841,10 +776,11 @@ function initAttractionFilter() {
         filterAttractions();
     });
 
-    // Live filtrovanie pri zmene selectov
+    let debounceTimer;
     filterForm.querySelectorAll('select').forEach(select => {
         select.addEventListener('change', function() {
-            filterAttractions();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => filterAttractions(), 300);
         });
     });
 
@@ -853,7 +789,6 @@ function initAttractionFilter() {
         const params = new URLSearchParams();
 
         formData.forEach((value, key) => {
-            // Preskocime 'c' parameter, pretoze je v URL hardcoded
             if (value && key !== 'c') params.append(key, value);
         });
 
@@ -876,19 +811,23 @@ function initAttractionFilter() {
             if (data.success) {
                 renderAttractions(data.data, data.count);
             } else {
-                console.error('Filter error:', data.error);
+                showAttractionError(data.error || 'Nastala chyba pri načítavaní');
             }
         })
         .catch(error => {
-            console.error('AJAX Attraction Filter Error:', error);
+            console.error('AJAX Filter Error:', error);
+            showAttractionError('Nastala chyba pri komunikácii so serverom');
         });
     }
 
     function renderAttractions(attractions, count) {
         if (!attractionGrid) return;
 
-        // Aktualizacia poctu vysledkov
+        const countBadge = document.getElementById('resultCount');
         const resultBadge = document.getElementById('resultBadge');
+        if (countBadge) {
+            countBadge.textContent = count;
+        }
         if (resultBadge) {
             let text = 'atrakcií';
             if (count == 1) text = 'atrakcia';
@@ -945,15 +884,30 @@ function initAttractionFilter() {
 
         attractionGrid.innerHTML = html;
     }
+
+    function showAttractionError(message) {
+        if (!attractionGrid) return;
+        attractionGrid.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger text-center" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> ${message}
+                </div>
+            </div>
+        `;
+    }
 }
 
 function clearAttractionFilters() {
     const filterForm = document.getElementById('attractionFilterForm');
     if (filterForm) {
-        filterForm.reset();
         filterForm.querySelectorAll('select').forEach(select => {
-            select.selectedIndex = 0;
+            if (select.name === 'zoradenie') {
+                select.value = 'najnovsie';
+            } else {
+                select.value = '';
+            }
         });
-        filterForm.dispatchEvent(new Event('submit'));
+
+        filterForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     }
 }

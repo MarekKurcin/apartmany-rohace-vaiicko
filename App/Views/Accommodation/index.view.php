@@ -1,7 +1,4 @@
 <?php
-/** @var array $accommodations */
-/** @var array $filters */
-/** @var \Framework\Support\LinkGenerator $link */
 
 $vybavenieOptions = ['WiFi', 'Parkovisko', 'Kuchyňa', 'TV', 'Krb', 'Balkón', 'Záhrada', 'Práčka'];
 $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',', $filters['vybavenie'])) : [];
@@ -16,7 +13,6 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
         </span>
     </div>
 
-    <!-- AJAX Filtračný formulár -->
     <div class="card mb-4 filter-panel">
         <div class="card-header">
             <h5><i class="bi bi-funnel"></i> Filtrovanie</h5>
@@ -25,7 +21,6 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
             <form id="accommodationFilterForm" action="<?= $link->url('accommodation.index') ?>" method="GET">
                 <input type="hidden" name="c" value="Accommodation">
 
-                <!-- Prvý riadok - základné filtre -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
                         <label for="kapacita" class="form-label"><i class="bi bi-people"></i> Počet osôb</label>
@@ -73,7 +68,6 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
                     </div>
                 </div>
 
-                <!-- Druhý riadok - vybavenie -->
                 <div class="border-top pt-3">
                     <label class="form-label mb-2"><i class="bi bi-check2-square"></i> Vybavenie</label>
                     <div class="d-flex flex-wrap gap-3">
@@ -95,7 +89,6 @@ $selectedVybavenie = isset($filters['vybavenie']) ? array_map('trim', explode(',
         </div>
     </div>
 
-    <!-- Tlačidlo pridať ubytovanie (pre prihlásených ubytovateľov) -->
     <?php if (isset($auth) && $auth->isLogged()): ?>
         <div class="mb-4">
             <a href="<?= $link->url('accommodation.create') ?>" class="btn btn-success">
